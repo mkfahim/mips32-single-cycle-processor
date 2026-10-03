@@ -1,0 +1,22 @@
+# Simulation artifacts
+*.vvp
+*.vcd
+dump.vcd
+*.o
+*.out
+
+# Editor/IDE
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+.idea/
+
+# Build artifacts
+obj/
+work/
+build/
+
+# Temporary files
+*.tmp
