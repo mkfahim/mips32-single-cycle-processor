@@ -1,0 +1,86 @@
+name: Verilog Unit Tests
+
+# Triggers: push to any branch, PRs, and manual runs
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Minimum permissions required for this workflow
+permissions:
+  contents: read
+
+jobs:
+  verilog-tests:
+    runs-on: ubuntu-latest
+    # timeout-minutes: 20  # optional: protect against runaway jobs
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+
+      - name: Run ALU testbench
+        id: alu
+        continue-on-error: true        # ensures later steps run even if this fails
+        run: |
+          set -euo pipefail
+          # Compile and run; capture simulator output to alu.log for upload
+          iverilog -g2012 -o alu_sim tb/alu_tb.v rtl/alu.v
+          vvp alu_sim 2>&1 | tee alu.log
+
+      - name: Run Register File testbench
+        id: regfile
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o regfile_sim tb/register_file_tb.v rtl/register_file.v
+          vvp regfile_sim 2>&1 | tee regfile.log
+
+      - name: Run Control Unit testbench
+        id: control
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o control_unit_sim tb/control_unit_tb.v rtl/control_unit.v
+          vvp control_unit_sim 2>&1 | tee control_unit.log
+
+      - name: Upload simulator logs
+        # Always upload logs so debugging is possible even when job fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verilog-sim-logs
+          path: |
+            alu.log
+            regfile.log
+            control_unit.log
+
+      - name: Evaluate results and fail if any test step failed
+        if: always()
+        env:
+          ALU_OUTCOME: ${{ steps.alu.outcome }}
+          REGFILE_OUTCOME: ${{ steps.regfile.outcome }}
+          CONTROL_OUTCOME: ${{ steps.control.outcome }}
+        run: |
+          echo "ALU step outcome: $ALU_OUTCOME"
+          echo "Regfile step outcome: $REGFILE_OUTCOME"
+          echo "Control step outcome: $CONTROL_OUTCOME"
+
+          failed=0
+          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME"; do
+            if [ "$result" != "success" ]; then
+              failed=1
+            fi
+          done
+
+          if [ "$failed" -ne 0 ]; then
+            echo "FAIL: One or more testbenches failed. See attached artifacts for logs."
+            exit 1
+          fi
+
+          echo "PASS: All three testbench steps succeeded."
