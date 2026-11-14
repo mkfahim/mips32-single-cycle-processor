@@ -22,6 +22,7 @@ module register_file_tb;
     reg  [4:0] write_addr;
     reg  [31:0] write_data;
     reg        write_enable;
+    integer    fail_count;
 
     // Instantiate register file
     register_file uut (
@@ -78,6 +79,7 @@ module register_file_tb;
             if (read_data1 === expected) begin
                 $display("✓ PASS: reg[%d] = 0x%08h  (%s)", addr, read_data1, desc);
             end else begin
+                fail_count = fail_count + 1;
                 $display("✗ FAIL: reg[%d] expected 0x%08h, got 0x%08h  (%s)", addr, expected, read_data1, desc);
             end
         end
@@ -85,6 +87,7 @@ module register_file_tb;
 
     // Main test sequence
     initial begin
+        fail_count = 0;
         $display("===== Register File Unit Test =====\n");
 
         // Initialize signals
@@ -125,6 +128,7 @@ module register_file_tb;
         if (read_data1 === 32'hAAAAAAAA && read_data2 === 32'h55555555) begin
             $display("✓ PASS: simultaneous reads (reg[3]=0x%08h, reg[4]=0x%08h)", read_data1, read_data2);
         end else begin
+            fail_count = fail_count + 1;
             $display("✗ FAIL: simultaneous reads (got reg[3]=0x%08h, reg[4]=0x%08h)", read_data1, read_data2);
         end
 
@@ -177,7 +181,10 @@ module register_file_tb;
         $display("\n--- Read from Unwritten Register ---");
         verify_register(5'd25, 32'h00000000, "read from unwritten reg[25] (should be zero)");
 
-        $display("\n===== Register File Test Complete =====\n");
+        if (fail_count != 0) begin
+            $fatal(1, "Register file test failed: %0d check(s)", fail_count);
+        end
+        $display("\n===== Register File Test Complete: PASS =====\n");
         $finish;
     end
 
