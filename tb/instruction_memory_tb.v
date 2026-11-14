@@ -19,7 +19,7 @@ module instruction_memory_tb;
     task check_instruction;
         input [31:0] address_value;
         input [31:0] expected;
-        input [255:0] test_name;
+        input string test_name;
         begin
             address = address_value;
             #1;
