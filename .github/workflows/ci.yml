@@ -1,19 +1,18 @@
 name: Verilog Unit Tests
 
-# Triggers: push to any branch, PRs, and manual runs
+# Run unit verification for every branch push, pull request, or manual dispatch.
 on:
   push:
   pull_request:
   workflow_dispatch:
 
-# Minimum permissions required for this workflow
+# The workflow only checks out source and uploads logs; no write access is needed.
 permissions:
   contents: read
 
 jobs:
   verilog-tests:
     runs-on: ubuntu-latest
-    # timeout-minutes: 20  # optional: protect against runaway jobs
 
     steps:
       - name: Checkout repository
@@ -24,12 +23,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y iverilog
 
+      # Each test step continues after failure so all unit tests report results.
       - name: Run ALU testbench
         id: alu
-        continue-on-error: true        # ensures later steps run even if this fails
+        continue-on-error: true
         run: |
           set -euo pipefail
-          # Compile and run; capture simulator output to alu.log for upload
           iverilog -g2012 -o alu_sim tb/alu_tb.v rtl/alu.v
           vvp alu_sim 2>&1 | tee alu.log
 
@@ -49,8 +48,16 @@ jobs:
           iverilog -g2012 -o control_unit_sim tb/control_unit_tb.v rtl/control_unit.v
           vvp control_unit_sim 2>&1 | tee control_unit.log
 
+      - name: Run Program Counter testbench
+        id: pc
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o pc_sim tb/pc_tb.v rtl/pc.v
+          vvp pc_sim 2>&1 | tee pc.log
+
+      # Preserve every simulator log, including logs from failed test steps.
       - name: Upload simulator logs
-        # Always upload logs so debugging is possible even when job fails
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -59,20 +66,24 @@ jobs:
             alu.log
             regfile.log
             control_unit.log
+            pc.log
 
+      # continue-on-error keeps the test steps running; this restores failure status.
       - name: Evaluate results and fail if any test step failed
         if: always()
         env:
           ALU_OUTCOME: ${{ steps.alu.outcome }}
           REGFILE_OUTCOME: ${{ steps.regfile.outcome }}
           CONTROL_OUTCOME: ${{ steps.control.outcome }}
+          PC_OUTCOME: ${{ steps.pc.outcome }}
         run: |
           echo "ALU step outcome: $ALU_OUTCOME"
           echo "Regfile step outcome: $REGFILE_OUTCOME"
           echo "Control step outcome: $CONTROL_OUTCOME"
+          echo "PC step outcome: $PC_OUTCOME"
 
           failed=0
-          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME"; do
+          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME" "$PC_OUTCOME"; do
             if [ "$result" != "success" ]; then
               failed=1
             fi
@@ -83,4 +94,4 @@ jobs:
             exit 1
           fi
 
-          echo "PASS: All three testbench steps succeeded."
+          echo "PASS: All four testbench steps succeeded."
