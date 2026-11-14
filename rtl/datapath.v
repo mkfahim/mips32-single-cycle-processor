@@ -19,6 +19,7 @@ module datapath (
     input  wire        branch_ne,
     input  wire        jump,
     input  wire        jal,
+    input  wire        jr,
     input  wire [3:0]  alu_op,
     output wire [31:0] next_pc,
     output wire [31:0] data_mem_address,
@@ -71,7 +72,8 @@ module datapath (
     assign data_mem_read = mem_read;
     assign data_mem_write = mem_write;
 
-    assign next_pc = jump ? jump_target :
-                     (branch_taken ? branch_target : pc_plus4);
+    assign next_pc = jr ? register_data1 :
+                     (jump ? jump_target :
+                     (branch_taken ? branch_target : pc_plus4));
 
 endmodule
