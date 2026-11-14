@@ -75,6 +75,7 @@ module datapath_tb;
         // addi $t0, $zero, 5; addi $t1, $zero, 7
         instruction = 32'h20080005;
         pc = 32'd0;
+        #1;
         check_value(next_pc, 32'd4, "addi next PC");
         clock_instruction(32'h20080005, 32'd0);
         clock_instruction(32'h20090007, 32'd4);
@@ -88,6 +89,7 @@ module datapath_tb;
         // sw $t2, 0($zero)
         instruction = 32'hAC0A0000;
         pc = 32'd12;
+        #1;
         check_value(data_mem_address, 32'd0, "sw address");
         check_value(data_mem_write_data, 32'd12, "sw write data");
         check_value({31'b0, data_mem_write}, 32'd1, "sw memory write enable");
@@ -101,16 +103,19 @@ module datapath_tb;
         // beq $t0, $t0, 2: 20 + 4 + (2 << 2) = 32
         instruction = 32'h11080002;
         pc = 32'd20;
+        #1;
         check_value(next_pc, 32'd32, "taken beq target");
 
         // bne $t0, $t0, 2 must not branch.
         instruction = 32'h15080002;
         pc = 32'd24;
+        #1;
         check_value(next_pc, 32'd28, "not-taken bne target");
 
         // j 0x10: target is 0x40 for a low PC region.
         instruction = 32'h08000010;
         pc = 32'd28;
+        #1;
         check_value(next_pc, 32'h00000040, "jump target");
 
         // jal 0x10 writes PC+4 to $ra and jumps to 0x40.
