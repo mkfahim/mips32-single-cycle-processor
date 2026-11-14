@@ -5,7 +5,7 @@
 //
 // Supported Instructions:
 //   R-type: add, sub, and, or, xor, slt
-//   I-type: addi, andi, ori, slti, lw, sw, beq, bne
+//   I-type: addi, andi, ori, xori, lui, slti, lw, sw, beq, bne
 //   J-type: j, jal
 
 module control_unit (
@@ -32,6 +32,7 @@ module control_unit (
     localparam OP_ANDI   = 6'b001100;  // andi
     localparam OP_ORI    = 6'b001101;  // ori
     localparam OP_XORI   = 6'b001110;  // xori
+    localparam OP_LUI    = 6'b001111;  // lui
     localparam OP_SLTI   = 6'b001010;  // slti
     localparam OP_LW     = 6'b100011;  // lw
     localparam OP_SW     = 6'b101011;  // sw
@@ -116,6 +117,14 @@ module control_unit (
                 alu_src   = 1'b1;
                 reg_write = 1'b1;
                 alu_op    = ALU_OR;
+            end
+
+            OP_LUI: begin
+                // lui: Load Upper Immediate (shifted left 16 bits at datapath)
+                reg_dst   = 1'b0;
+                alu_src   = 1'b1;
+                reg_write = 1'b1;
+                alu_op    = ALU_ADD;
             end
 
             OP_SLTI: begin
