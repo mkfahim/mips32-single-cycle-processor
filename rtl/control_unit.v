@@ -31,6 +31,7 @@ module control_unit (
     localparam OP_ADDI   = 6'b001000;  // addi
     localparam OP_ANDI   = 6'b001100;  // andi
     localparam OP_ORI    = 6'b001101;  // ori
+    localparam OP_XORI   = 6'b001110;  // xori
     localparam OP_SLTI   = 6'b001010;  // slti
     localparam OP_LW     = 6'b100011;  // lw
     localparam OP_SW     = 6'b101011;  // sw
@@ -123,6 +124,14 @@ module control_unit (
                 alu_src   = 1'b1;
                 reg_write = 1'b1;
                 alu_op    = ALU_SLT;
+            end
+
+            OP_XORI: begin
+                // xori: XOR Immediate (zero-extended at datapath)
+                reg_dst   = 1'b0;
+                alu_src   = 1'b1;
+                reg_write = 1'b1;
+                alu_op    = ALU_XOR;
             end
 
             OP_LW: begin
