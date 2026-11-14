@@ -32,7 +32,7 @@ module data_memory_tb;
     task check_read;
         input [31:0] address_value;
         input [31:0] expected;
-        input [255:0] test_name;
+        input string test_name;
         begin
             address = address_value;
             mem_read = 1'b1;
