@@ -38,6 +38,7 @@ module datapath_tb;
         input [31:0] expected;
         input string name;
         begin
+            #1;
             if (actual === expected) begin
                 $display("PASS: %s -> 0x%08h", name, actual);
             end else begin
