@@ -23,6 +23,7 @@ module control_unit (
     output reg         branch_ne,   // 1=bne, 0=beq when branch is asserted
     output reg         jump,        // 1=j/jal jump
     output reg         jal,         // 1=jal (write return address)
+    output reg         jr,          // 1=jr (jump to register address)
     output reg [3:0]   alu_op       // ALU operation code
 );
 
