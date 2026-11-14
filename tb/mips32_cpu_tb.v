@@ -58,6 +58,7 @@ module mips32_cpu_tb;
         // 9: nop
         //10: addi $t5, $zero, 42
         //11: xori $t6, $t0, 0x00ff
+        //12: lui  $t7, 0x1234
         dut.instruction_memory_unit.memory[0]  = 32'h20080005;
         dut.instruction_memory_unit.memory[1]  = 32'h20090007;
         dut.instruction_memory_unit.memory[2]  = 32'h01095020;
@@ -70,6 +71,7 @@ module mips32_cpu_tb;
         dut.instruction_memory_unit.memory[9]  = 32'h00000000;
         dut.instruction_memory_unit.memory[10] = 32'h200D002A;
         dut.instruction_memory_unit.memory[11] = 32'h390E00FF;
+        dut.instruction_memory_unit.memory[12] = 32'h3C0F1234;
 
         $display("===== MIPS32 Single-Cycle CPU Test =====");
         step;
@@ -106,6 +108,9 @@ module mips32_cpu_tb;
 
         step;
         check_value(dut.datapath_unit.rf.registers[14], 32'h000000FA, "xori writes $t6");
+
+        step;
+        check_value(dut.datapath_unit.rf.registers[15], 32'h12340000, "lui writes $t7");
 
         if (fail_count != 0) begin
             $fatal(1, "CPU integration test failed: %0d check(s)", fail_count);
