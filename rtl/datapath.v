@@ -29,9 +29,11 @@ module datapath (
 
     wire [31:0] pc_plus4 = pc + 32'd4;
     wire [5:0] opcode = instruction[31:26];
-    wire [31:0] immediate = (opcode == 6'b001100 || opcode == 6'b001101)
-                          ? {16'b0, instruction[15:0]}
-                          : {{16{instruction[15]}}, instruction[15:0]};
+    wire [31:0] immediate = (opcode == 6'b001111)
+                          ? {instruction[15:0], 16'b0}
+                          : ((opcode == 6'b001100 || opcode == 6'b001101 || opcode == 6'b001110)
+                             ? {16'b0, instruction[15:0]}
+                             : {{16{instruction[15]}}, instruction[15:0]});
     wire [31:0] branch_target = pc_plus4 + (immediate << 2);
     wire [31:0] jump_target = {pc_plus4[31:28], instruction[25:0], 2'b00};
 
