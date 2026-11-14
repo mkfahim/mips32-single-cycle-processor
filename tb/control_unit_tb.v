@@ -6,7 +6,7 @@ module control_unit_tb;
     reg [5:0] opcode;
     reg [5:0] funct;
     wire reg_dst, alu_src, mem_to_reg, reg_write, mem_read, mem_write;
-    wire branch, branch_ne, jump, jal;
+    wire branch, branch_ne, jump, jal, jr;
     wire [3:0] alu_op;
     integer fail_count;
 
@@ -14,7 +14,7 @@ module control_unit_tb;
         .opcode(opcode), .funct(funct), .reg_dst(reg_dst), .alu_src(alu_src),
         .mem_to_reg(mem_to_reg), .reg_write(reg_write), .mem_read(mem_read),
         .mem_write(mem_write), .branch(branch), .branch_ne(branch_ne),
-        .jump(jump), .jal(jal), .alu_op(alu_op)
+        .jump(jump), .jal(jal), .jr(jr), .alu_op(alu_op)
     );
 
     task check;
@@ -65,6 +65,15 @@ module control_unit_tb;
         check(6'b000101, 0, 0,0,0,0,0,0,1,1,0,0, 4'b0001, "bne");
         check(6'b000010, 0, 0,0,0,0,0,0,0,0,1,0, 4'b0000, "j");
         check(6'b000011, 0, 0,0,0,1,0,0,0,0,1,1, 4'b0000, "jal");
+        opcode = 6'b000000;
+        funct = 6'b001000;
+        #1;
+        if (jr === 1'b1 && reg_write === 1'b0 && jump === 1'b0) begin
+            $display("PASS: jr");
+        end else begin
+            fail_count = fail_count + 1;
+            $display("FAIL: jr");
+        end
         check(6'b000000, 0, 0,0,0,0,0,0,0,0,0,0, 4'b0000, "unsupported funct");
         check(6'b111111, 0, 0,0,0,0,0,0,0,0,0,0, 4'b0000, "unsupported opcode");
         if (fail_count != 0) $fatal(1, "Control unit test failed: %0d check(s)", fail_count);
