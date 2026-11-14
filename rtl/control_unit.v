@@ -20,6 +20,7 @@ module control_unit (
     output reg         mem_read,    // 1=read from data memory
     output reg         mem_write,   // 1=write to data memory
     output reg         branch,      // 1=beq/bne branch
+    output reg         branch_ne,   // 1=bne, 0=beq when branch is asserted
     output reg         jump,        // 1=j/jal jump
     output reg         jal,         // 1=jal (write return address)
     output reg [3:0]   alu_op       // ALU operation code
@@ -64,6 +65,7 @@ module control_unit (
         mem_read   = 1'b0;
         mem_write  = 1'b0;
         branch     = 1'b0;
+        branch_ne  = 1'b0;
         jump       = 1'b0;
         jal        = 1'b0;
         alu_op     = 4'b0000;
@@ -150,6 +152,7 @@ module control_unit (
             OP_BNE: begin
                 // bne: Branch if Not Equal
                 alu_src = 1'b0;
+                branch_ne = 1'b1;
                 branch  = 1'b1;
                 alu_op  = ALU_SUB;
             end
