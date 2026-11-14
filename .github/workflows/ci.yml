@@ -80,6 +80,14 @@ jobs:
           iverilog -g2012 -o datapath_sim tb/datapath_tb.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v
           vvp datapath_sim 2>&1 | tee datapath.log
 
+      - name: Run CPU integration testbench
+        id: cpu
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/mips32_cpu.v rtl/pc.v rtl/instruction_memory.v rtl/data_memory.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v
+          vvp cpu_sim 2>&1 | tee cpu.log
+
       # Preserve every simulator log, including logs from failed test steps.
       - name: Upload simulator logs
         if: always()
@@ -94,6 +102,7 @@ jobs:
             instruction_memory.log
             data_memory.log
             datapath.log
+            cpu.log
 
       # continue-on-error keeps the test steps running; this restores failure status.
       - name: Evaluate results and fail if any test step failed
@@ -106,6 +115,7 @@ jobs:
           INSTRUCTION_MEMORY_OUTCOME: ${{ steps.instruction_memory.outcome }}
           DATA_MEMORY_OUTCOME: ${{ steps.data_memory.outcome }}
           DATAPATH_OUTCOME: ${{ steps.datapath.outcome }}
+          CPU_OUTCOME: ${{ steps.cpu.outcome }}
         run: |
           echo "ALU step outcome: $ALU_OUTCOME"
           echo "Regfile step outcome: $REGFILE_OUTCOME"
@@ -114,9 +124,10 @@ jobs:
           echo "Instruction memory step outcome: $INSTRUCTION_MEMORY_OUTCOME"
           echo "Data memory step outcome: $DATA_MEMORY_OUTCOME"
           echo "Datapath step outcome: $DATAPATH_OUTCOME"
+          echo "CPU step outcome: $CPU_OUTCOME"
 
           failed=0
-          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME" "$PC_OUTCOME" "$INSTRUCTION_MEMORY_OUTCOME" "$DATA_MEMORY_OUTCOME" "$DATAPATH_OUTCOME"; do
+          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME" "$PC_OUTCOME" "$INSTRUCTION_MEMORY_OUTCOME" "$DATA_MEMORY_OUTCOME" "$DATAPATH_OUTCOME" "$CPU_OUTCOME"; do
             if [ "$result" != "success" ]; then
               failed=1
             fi
@@ -127,4 +138,4 @@ jobs:
             exit 1
           fi
 
-          echo "PASS: All seven testbench steps succeeded."
+          echo "PASS: All eight testbench steps succeeded."
