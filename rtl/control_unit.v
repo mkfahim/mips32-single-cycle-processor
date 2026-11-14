@@ -82,7 +82,12 @@ module control_unit (
                     FUNCT_OR:  alu_op = ALU_OR;
                     FUNCT_XOR: alu_op = ALU_XOR;
                     FUNCT_SLT: alu_op = ALU_SLT;
-                    default:   reg_write = 1'b0;  // Unsupported funct -> no write
+                    default: begin
+                        // Unsupported funct: disable write and reset reg_dst to safe default
+                        reg_write = 1'b0;  // Unsupported funct -> no write
+                        reg_dst   = 1'b0;  // treat as unsupported: do not select rd
+                        alu_op    = 4'b0000;
+                    end
                 endcase
             end
 
