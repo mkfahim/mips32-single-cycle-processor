@@ -64,6 +64,14 @@ jobs:
           iverilog -g2012 -o instruction_memory_sim tb/instruction_memory_tb.v rtl/instruction_memory.v
           vvp instruction_memory_sim 2>&1 | tee instruction_memory.log
 
+      - name: Run Data Memory testbench
+        id: data_memory
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o data_memory_sim tb/data_memory_tb.v rtl/data_memory.v
+          vvp data_memory_sim 2>&1 | tee data_memory.log
+
       # Preserve every simulator log, including logs from failed test steps.
       - name: Upload simulator logs
         if: always()
@@ -76,6 +84,7 @@ jobs:
             control_unit.log
             pc.log
             instruction_memory.log
+            data_memory.log
 
       # continue-on-error keeps the test steps running; this restores failure status.
       - name: Evaluate results and fail if any test step failed
@@ -86,15 +95,17 @@ jobs:
           CONTROL_OUTCOME: ${{ steps.control.outcome }}
           PC_OUTCOME: ${{ steps.pc.outcome }}
           INSTRUCTION_MEMORY_OUTCOME: ${{ steps.instruction_memory.outcome }}
+          DATA_MEMORY_OUTCOME: ${{ steps.data_memory.outcome }}
         run: |
           echo "ALU step outcome: $ALU_OUTCOME"
           echo "Regfile step outcome: $REGFILE_OUTCOME"
           echo "Control step outcome: $CONTROL_OUTCOME"
           echo "PC step outcome: $PC_OUTCOME"
           echo "Instruction memory step outcome: $INSTRUCTION_MEMORY_OUTCOME"
+          echo "Data memory step outcome: $DATA_MEMORY_OUTCOME"
 
           failed=0
-          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME" "$PC_OUTCOME" "$INSTRUCTION_MEMORY_OUTCOME"; do
+          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME" "$PC_OUTCOME" "$INSTRUCTION_MEMORY_OUTCOME" "$DATA_MEMORY_OUTCOME"; do
             if [ "$result" != "success" ]; then
               failed=1
             fi
@@ -105,4 +116,4 @@ jobs:
             exit 1
           fi
 
-          echo "PASS: All five testbench steps succeeded."
+          echo "PASS: All six testbench steps succeeded."
