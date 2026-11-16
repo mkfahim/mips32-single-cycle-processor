@@ -53,6 +53,7 @@ module control_unit_tb;
         check(6'b000000, 6'b100101, 1,0,0,1,0,0,0,0,0,0, 4'b0011, "or");
         check(6'b000000, 6'b100110, 1,0,0,1,0,0,0,0,0,0, 4'b0100, "xor");
         check(6'b000000, 6'b101010, 1,0,0,1,0,0,0,0,0,0, 4'b0101, "slt");
+        check(6'b000000, 6'b000000, 1,0,0,1,0,0,0,0,0,0, 4'b1000, "sll");
         check(6'b001000, 0, 0,1,0,1,0,0,0,0,0,0, 4'b0000, "addi");
         check(6'b001100, 0, 0,1,0,1,0,0,0,0,0,0, 4'b0010, "andi");
         check(6'b001101, 0, 0,1,0,1,0,0,0,0,0,0, 4'b0011, "ori");
@@ -74,7 +75,7 @@ module control_unit_tb;
             fail_count = fail_count + 1;
             $display("FAIL: jr");
         end
-        check(6'b000000, 0, 0,0,0,0,0,0,0,0,0,0, 4'b0000, "unsupported funct");
+        check(6'b000000, 6'b111111, 0,0,0,0,0,0,0,0,0,0, 4'b0000, "unsupported funct");
         check(6'b111111, 0, 0,0,0,0,0,0,0,0,0,0, 4'b0000, "unsupported opcode");
         if (fail_count != 0) $fatal(1, "Control unit test failed: %0d check(s)", fail_count);
         $display("PASS: Control unit test completed with no failures");

@@ -40,6 +40,7 @@ module datapath (
 
     wire [31:0] register_data1;
     wire [31:0] register_data2;
+    wire [4:0]  shift_amount = instruction[10:6];
     wire [31:0] alu_operand2 = alu_src ? immediate : register_data2;
     wire [31:0] alu_result;
     wire        alu_zero;
@@ -62,6 +63,7 @@ module datapath (
     alu alu_unit (
         .a(register_data1),
         .b(alu_operand2),
+        .shamt(shift_amount),
         .alu_control(alu_op),
         .result(alu_result),
         .zero(alu_zero)

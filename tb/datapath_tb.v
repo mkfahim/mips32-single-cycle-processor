@@ -86,9 +86,13 @@ module datapath_tb;
         clock_instruction(32'h01095020, 32'd8);
         check_value(dut.rf.registers[10], 32'd12, "add writes $t2");
 
+        // sll $t4, $t2, 2
+        clock_instruction(32'h000A6080, 32'd12);
+        check_value(dut.rf.registers[12], 32'd48, "sll writes $t4");
+
         // sw $t2, 0($zero)
         instruction = 32'hAC0A0000;
-        pc = 32'd12;
+        pc = 32'd16;
         #1;
         check_value(data_mem_address, 32'd0, "sw address");
         check_value(data_mem_write_data, 32'd12, "sw write data");

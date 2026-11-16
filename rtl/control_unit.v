@@ -4,7 +4,7 @@
 // for the single-cycle datapath.
 //
 // Supported Instructions:
-//   R-type: add, sub, and, or, xor, slt, jr
+//   R-type: add, sub, and, or, xor, slt, sll, jr
 //   I-type: addi, andi, ori, xori, lui, slti, lw, sw, beq, bne
 //   J-type: j, jal
 
@@ -49,6 +49,7 @@ module control_unit (
     localparam FUNCT_OR  = 6'b100101;  // or
     localparam FUNCT_XOR = 6'b100110;  // xor
     localparam FUNCT_SLT = 6'b101010;  // slt
+    localparam FUNCT_SLL = 6'b000000;  // sll
     localparam FUNCT_JR  = 6'b001000;  // jr
 
     // ALU operation codes (must match ALU module)
@@ -58,6 +59,7 @@ module control_unit (
     localparam ALU_OR   = 4'b0011;
     localparam ALU_XOR  = 4'b0100;
     localparam ALU_SLT  = 4'b0101;
+    localparam ALU_SLL  = 4'b1000;
 
     // Combinational control logic
     always @(*) begin
@@ -89,6 +91,7 @@ module control_unit (
                     FUNCT_OR:  alu_op = ALU_OR;
                     FUNCT_XOR: alu_op = ALU_XOR;
                     FUNCT_SLT: alu_op = ALU_SLT;
+                    FUNCT_SLL: alu_op = ALU_SLL;
                     FUNCT_JR: begin
                         reg_dst   = 1'b0;
                         reg_write = 1'b0;

@@ -15,6 +15,7 @@ module alu_tb;
     // Testbench signals
     reg  [31:0] a;
     reg  [31:0] b;
+    reg  [4:0]  shamt;
     reg  [3:0]  alu_control;
     wire [31:0] result;
     wire        zero;
@@ -23,6 +24,7 @@ module alu_tb;
     alu uut (
         .a(a),
         .b(b),
+        .shamt(shamt),
         .alu_control(alu_control),
         .result(result),
         .zero(zero)
@@ -39,6 +41,7 @@ module alu_tb;
         begin
             a = a_val;
             b = b_val;
+            shamt = 5'd0;
             alu_control = ctrl;
             #1;
 
@@ -105,6 +108,20 @@ module alu_tb;
         $display("\n--- SUBU Tests ---");
         test_operation(32'd20, 32'd8, 4'b0111, 32'd12, 1'b0, "subu(20, 8)");
         test_operation(32'd0, 32'd1, 4'b0111, 32'hFFFFFFFF, 1'b0, "subu(0, 1) [wrap]");
+
+        // SLL
+        $display("\n--- SLL Tests ---");
+        a = 32'd0;
+        b = 32'h12345678;
+        shamt = 5'd4;
+        alu_control = 4'b1000;
+        #1;
+        if (result === 32'h23456780 && zero === 1'b0) begin
+            $display("✓ PASS: sll(0x12345678, 4) => 0x%08h, zero=%b", result, zero);
+        end else begin
+            fail_count = fail_count + 1;
+            $display("✗ FAIL: sll(0x12345678, 4) => got 0x%08h (zero=%b)", result, zero);
+        end
 
         $display("\n===== ALU Test Complete =====\n");
         if (fail_count > 0) begin
