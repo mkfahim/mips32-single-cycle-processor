@@ -7,7 +7,7 @@ module datapath_tb;
     reg clk, reset;
     reg [31:0] pc, instruction, data_mem_read_data;
     wire reg_dst, alu_src, mem_to_reg, reg_write, mem_read, mem_write;
-    wire branch, branch_ne, jump, jal;
+    wire branch, branch_ne, jump, jal, jr;
     wire [3:0] alu_op;
     wire [31:0] next_pc, data_mem_address, data_mem_write_data;
     wire data_mem_read, data_mem_write;
@@ -17,7 +17,7 @@ module datapath_tb;
         .opcode(instruction[31:26]), .funct(instruction[5:0]),
         .reg_dst(reg_dst), .alu_src(alu_src), .mem_to_reg(mem_to_reg),
         .reg_write(reg_write), .mem_read(mem_read), .mem_write(mem_write),
-        .branch(branch), .branch_ne(branch_ne), .jump(jump), .jal(jal), .alu_op(alu_op)
+        .branch(branch), .branch_ne(branch_ne), .jump(jump), .jal(jal), .jr(jr), .alu_op(alu_op)
     );
 
     datapath dut (
@@ -25,7 +25,7 @@ module datapath_tb;
         .data_mem_read_data(data_mem_read_data), .reg_dst(reg_dst),
         .alu_src(alu_src), .mem_to_reg(mem_to_reg), .reg_write(reg_write),
         .mem_read(mem_read), .mem_write(mem_write), .branch(branch),
-        .branch_ne(branch_ne), .jump(jump), .jal(jal), .alu_op(alu_op),
+        .branch_ne(branch_ne), .jump(jump), .jal(jal), .jr(jr), .alu_op(alu_op),
         .next_pc(next_pc), .data_mem_address(data_mem_address),
         .data_mem_write_data(data_mem_write_data), .data_mem_read(data_mem_read),
         .data_mem_write(data_mem_write)
