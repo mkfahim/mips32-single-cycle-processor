@@ -1,10 +1,66 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#ffffff",
+    "fontFamily": "Arial, Helvetica, sans-serif",
+    "fontSize": "18px",
+    "primaryColor": "#e0f2fe",
+    "primaryTextColor": "#0f172a",
+    "primaryBorderColor": "#0284c7",
+    "lineColor": "#475569",
+    "secondaryColor": "#fef3c7",
+    "tertiaryColor": "#dcfce7"
+  },
+  "flowchart": {
+    "htmlLabels": true,
+    "curve": "basis",
+    "nodeSpacing": 55,
+    "rankSpacing": 75,
+    "padding": 18
+  }
+}}%%
+
 flowchart LR
-    I["addi $t0, $zero, 5<br/>instruction[31:26] = opcode"] --> D["Control Unit<br/>alu_src=1<br/>reg_write=1<br/>alu_op=ADD"]
-    I --> R["Register File<br/>read $zero = 0<br/>destination = $t0"]
-    I --> X["Immediate Formation<br/>sign-extend 5"]
-    R --> A["ALU"]
+    I["<b>Instruction</b><br/><code>addi $t0, $zero, 5</code>"]
+
+    subgraph D["Decode"]
+        direction TB
+        C["<b>Control unit</b><br/>ADD · immediate · write"]
+        F["<b>Instruction fields</b><br/>rs = $zero · rt = $t0 · imm = 5"]
+    end
+
+    subgraph O["Operands"]
+        direction TB
+        R["<b>Register file</b><br/>read $zero → 0"]
+        X["<b>Immediate extender</b><br/>5 → 0x00000005"]
+    end
+
+    A["<b>ALU</b><br/>0 + 5 = 5"]
+
+    subgraph W["Clock-edge updates"]
+        direction TB
+        WB["<b>Register write</b><br/>register[8] &lt;= 5"]
+        N["<b>Next PC</b><br/>PC + 4"]
+    end
+
+    I --> F
+    F --> C
+    F --> R
+    F --> X
+    C --> A
+    R --> A
     X --> A
-    D --> A
-    A --> W["Write-back<br/>0 + 5 = 5"]
-    W --> E["At rising edge:<br/>register[8] <= 5"]
-    E --> N["Next PC = PC + 4"]
+    A --> WB
+    C --> N
+
+    classDef instruction fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0f172a
+    classDef decode fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#0f172a
+    classDef operand fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#0f172a
+    classDef execute fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#0f172a
+    classDef update fill:#cffafe,stroke:#0891b2,stroke-width:2px,color:#0f172a
+
+    class I instruction
+    class C,F decode
+    class R,X operand
+    class A execute
+    class WB,N update
