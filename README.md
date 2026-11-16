@@ -39,9 +39,8 @@ textbook concepts to the actual files in `rtl/`.
 12. [Repository structure](#repository-structure)
 13. [Run the processor](#run-the-processor)
 14. [Understand the testbenches](#understand-the-testbenches)
-15. [Exercises for beginners](#exercises-for-beginners)
-16. [What this project does not cover](#what-this-project-does-not-cover)
-17. [Further reading](#further-reading)
+15. [What this project does not cover](#what-this-project-does-not-cover)
+16. [Further reading](#further-reading)
 
 ---
 
@@ -658,53 +657,6 @@ when a module feels unfamiliar: the checks explain what behavior the module
 promises.
 
 More detail is available in [`docs/verification.md`](docs/verification.md).
-
----
-
-## Exercises for beginners
-
-Try to answer each question before running the simulation.
-
-### Exercise 1: change an immediate
-
-Change `addi $t0, $zero, 5` to use 12. Predict the register value and PC.
-
-### Exercise 2: observe sign extension
-
-Use an immediate of `16'hffff` with `addi`. Predict the 32-bit ALU operand.
-Then compare it with the same bit pattern used by `andi`.
-
-### Exercise 3: follow an R-type instruction
-
-Trace `add $t2, $t0, $t1`:
-
-- Which fields select `$t0` and `$t1`?
-- Which field selects `$t2`?
-- Why is `reg_dst` asserted?
-
-### Exercise 4: break and repair a branch
-
-Temporarily make `bne` use the same condition as `beq`. Run the testbench,
-observe the failure, and restore `branch_ne`.
-
-### Exercise 5: inspect a memory transaction
-
-Add displays for `data_mem_address`, `data_mem_write_data`, `data_mem_read`,
-and `data_mem_write`. Compare `lw` and `sw`.
-
-### Exercise 6: add a new instruction
-
-Add one simple instruction through the complete workflow:
-
-1. define its encoding;
-2. update the ALU if needed;
-3. update the control unit;
-4. update the datapath if needed;
-5. add focused tests;
-6. add an end-to-end program test;
-7. update the instruction documentation.
-
-Suggested first additions are `addu` or `subu`.
 
 ---
 
