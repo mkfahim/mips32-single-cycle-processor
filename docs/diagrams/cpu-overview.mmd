@@ -1,15 +1,59 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#ffffff",
+    "fontFamily": "Arial, Helvetica, sans-serif",
+    "fontSize": "18px",
+    "primaryTextColor": "#0f172a",
+    "lineColor": "#475569",
+    "clusterBkg": "#ffffff",
+    "clusterBorder": "#94a3b8"
+  },
+  "flowchart": {
+    "htmlLabels": true,
+    "curve": "basis",
+    "nodeSpacing": 55,
+    "rankSpacing": 85,
+    "padding": 18
+  }
+}}%%
+
 flowchart LR
-    PC["pc.v<br/>Program Counter"] --> IM["instruction_memory.v<br/>Instruction Memory"]
-    IM --> CU["control_unit.v<br/>Control Unit"]
-    IM --> DP["datapath.v<br/>Datapath"]
-    CU --> DP
-    DP --> DM["data_memory.v<br/>Data Memory"]
-    DM --> DP
-    DP --> PC
-    RF["register_file.v<br/>Register File"] --- DP
-    ALU["alu.v<br/>ALU"] --- DP
-    CPU["mips32_cpu.v<br/>Top-Level CPU"] -. contains .-> PC
-    CPU -. contains .-> IM
-    CPU -. contains .-> CU
-    CPU -. contains .-> DP
-    CPU -. contains .-> DM
+    subgraph CPU["mips32_cpu.v · Top-level CPU"]
+        direction LR
+
+        PC["<b>PC</b><br/><code>pc.v</code>"]
+        IM["<b>Instruction memory</b><br/><code>instruction_memory.v</code>"]
+
+        subgraph CORE["Datapath"]
+            direction TB
+            CU["<b>Control unit</b><br/><code>control_unit.v</code>"]
+            DP["<b>Datapath logic</b><br/><code>datapath.v</code>"]
+            RF["<b>Register file</b><br/><code>register_file.v</code>"]
+            ALU["<b>ALU</b><br/><code>alu.v</code>"]
+            CU --> DP
+            RF --> DP
+            DP --> ALU
+        end
+
+        DM["<b>Data memory</b><br/><code>data_memory.v</code>"]
+
+        PC -->|address| IM
+        IM -->|instruction| CU
+        IM -->|instruction| DP
+        DP -->|address + write data| DM
+        DM -->|read data| DP
+        DP -->|next PC| PC
+    end
+
+    classDef state fill:#dbeafe,stroke:#0284c7,stroke-width:2px,color:#0f172a
+    classDef memory fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#0f172a
+    classDef control fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#0f172a
+    classDef datapath fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#0f172a
+    classDef data fill:#cffafe,stroke:#0891b2,stroke-width:2px,color:#0f172a
+
+    class PC state
+    class IM memory
+    class CU control
+    class DP,RF,ALU datapath
+    class DM data
