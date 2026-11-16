@@ -349,12 +349,7 @@ The processor uses three simple instruction shapes.
 
 ### R-type: register operations
 
-```text
-31             26 25       21 20       16 15       11 10        6 5       0
-+----------------+-----------+-----------+-----------+-----------+---------+
-| opcode = 0     | rs        | rt        | rd        | shamt     | funct   |
-+----------------+-----------+-----------+-----------+-----------+---------+
-```
+![R-type instruction format](docs/diagrams/r-type.svg)
 
 Example:
 
@@ -366,12 +361,7 @@ The CPU reads `$t0` and `$t1`, adds them, and writes the result to `$t2`.
 
 ### I-type: immediate and memory operations
 
-```text
-31             26 25       21 20       16 15                         0
-+----------------+-----------+-----------+-----------------------------+
-| opcode         | rs        | rt        | immediate                   |
-+----------------+-----------+-----------+-----------------------------+
-```
+![I-type instruction format](docs/diagrams/i-type.svg)
 
 Example:
 
@@ -384,12 +374,7 @@ The CPU reads `$zero`, forms the immediate value 5, and writes the result to
 
 ### J-type: control-flow operations
 
-```text
-31             26 25                                      0
-+----------------+-----------------------------------------+
-| opcode         | target                                  |
-+----------------+-----------------------------------------+
-```
+![J-type instruction format](docs/diagrams/j-type.svg)
 
 `j` and `jal` use the target field to construct a new PC.
 
@@ -555,35 +540,51 @@ The implementation uses these conventions:
 
 ## Repository structure
 
-```text
-rtl/
-  alu.v                 Arithmetic and logic operations
-  control_unit.v        Opcode and function decoding
-  data_memory.v         Combinational-read, clocked-write data memory
-  datapath.v            Operands, ALU, write-back, and next-PC logic
-  instruction_memory.v  Read-only instruction memory
-  mips32_cpu.v          Complete top-level CPU
-  pc.v                  Program counter
-  register_file.v       32 registers with two asynchronous reads
+<details>
+<summary><strong>rtl/ — Processor implementation</strong></summary>
 
-tb/
-  alu_tb.v
-  control_unit_tb.v
-  data_memory_tb.v
-  datapath_tb.v
-  instruction_memory_tb.v
-  mips32_cpu_tb.v
-  pc_tb.v
-  register_file_tb.v
+| File | Purpose |
+|---|---|
+| `alu.v` | Arithmetic and logic operations |
+| `control_unit.v` | Opcode and function decoding |
+| `data_memory.v` | Data memory |
+| `datapath.v` | Datapath connections |
+| `instruction_memory.v` | Instruction storage |
+| `mips32_cpu.v` | Complete CPU |
+| `pc.v` | Program counter |
+| `register_file.v` | Register storage |
 
-docs/
-  beginner-roadmap.md   Beginner course and exercises
-  architecture.md       Datapath and control explanation
-  instruction-set.md    Encodings and supported behavior
-  verification.md       Testbench and CI strategy
-  learning-notes.md     Design decisions and experiments
-  diagrams/             Mermaid sources and rendered SVG visuals
-```
+</details>
+
+<details>
+<summary><strong>tb/ — Testbenches</strong></summary>
+
+| File | Purpose |
+|---|---|
+| `alu_tb.v` | ALU tests |
+| `control_unit_tb.v` | Control-unit tests |
+| `data_memory_tb.v` | Data-memory tests |
+| `datapath_tb.v` | Datapath tests |
+| `instruction_memory_tb.v` | Instruction-memory tests |
+| `mips32_cpu_tb.v` | Complete CPU integration test |
+| `pc_tb.v` | Program-counter tests |
+| `register_file_tb.v` | Register-file tests |
+
+</details>
+
+<details>
+<summary><strong>docs/ — Documentation and diagrams</strong></summary>
+
+| File or directory | Purpose |
+|---|---|
+| `beginner-roadmap.md` | Beginner learning path |
+| `architecture.md` | Datapath and control explanation |
+| `instruction-set.md` | Instruction formats and encodings |
+| `verification.md` | Testbench and CI strategy |
+| `learning-notes.md` | Design notes and experiments |
+| `diagrams/` | SVG diagrams and Mermaid sources |
+
+</details>
 
 ---
 
