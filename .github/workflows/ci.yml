@@ -1,19 +1,18 @@
 name: Verilog Unit Tests
 
-# Triggers: push to any branch, PRs, and manual runs
+# Run unit verification for every branch push, pull request, or manual dispatch.
 on:
   push:
   pull_request:
   workflow_dispatch:
 
-# Minimum permissions required for this workflow
+# The workflow only checks out source and uploads logs; no write access is needed.
 permissions:
   contents: read
 
 jobs:
   verilog-tests:
     runs-on: ubuntu-latest
-    # timeout-minutes: 20  # optional: protect against runaway jobs
 
     steps:
       - name: Checkout repository
@@ -24,12 +23,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y iverilog
 
+      # Each test step continues after failure so all unit tests report results.
       - name: Run ALU testbench
         id: alu
-        continue-on-error: true        # ensures later steps run even if this fails
+        continue-on-error: true
         run: |
           set -euo pipefail
-          # Compile and run; capture simulator output to alu.log for upload
           iverilog -g2012 -o alu_sim tb/alu_tb.v rtl/alu.v
           vvp alu_sim 2>&1 | tee alu.log
 
@@ -49,8 +48,48 @@ jobs:
           iverilog -g2012 -o control_unit_sim tb/control_unit_tb.v rtl/control_unit.v
           vvp control_unit_sim 2>&1 | tee control_unit.log
 
+      - name: Run Program Counter testbench
+        id: pc
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o pc_sim tb/pc_tb.v rtl/pc.v
+          vvp pc_sim 2>&1 | tee pc.log
+
+      - name: Run Instruction Memory testbench
+        id: instruction_memory
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o instruction_memory_sim tb/instruction_memory_tb.v rtl/instruction_memory.v
+          vvp instruction_memory_sim 2>&1 | tee instruction_memory.log
+
+      - name: Run Data Memory testbench
+        id: data_memory
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o data_memory_sim tb/data_memory_tb.v rtl/data_memory.v
+          vvp data_memory_sim 2>&1 | tee data_memory.log
+
+      - name: Run Datapath testbench
+        id: datapath
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o datapath_sim tb/datapath_tb.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v
+          vvp datapath_sim 2>&1 | tee datapath.log
+
+      - name: Run CPU integration testbench
+        id: cpu
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/mips32_cpu.v rtl/pc.v rtl/instruction_memory.v rtl/data_memory.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v
+          vvp cpu_sim 2>&1 | tee cpu.log
+
+      # Preserve every simulator log, including logs from failed test steps.
       - name: Upload simulator logs
-        # Always upload logs so debugging is possible even when job fails
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -59,20 +98,36 @@ jobs:
             alu.log
             regfile.log
             control_unit.log
+            pc.log
+            instruction_memory.log
+            data_memory.log
+            datapath.log
+            cpu.log
 
+      # continue-on-error keeps the test steps running; this restores failure status.
       - name: Evaluate results and fail if any test step failed
         if: always()
         env:
           ALU_OUTCOME: ${{ steps.alu.outcome }}
           REGFILE_OUTCOME: ${{ steps.regfile.outcome }}
           CONTROL_OUTCOME: ${{ steps.control.outcome }}
+          PC_OUTCOME: ${{ steps.pc.outcome }}
+          INSTRUCTION_MEMORY_OUTCOME: ${{ steps.instruction_memory.outcome }}
+          DATA_MEMORY_OUTCOME: ${{ steps.data_memory.outcome }}
+          DATAPATH_OUTCOME: ${{ steps.datapath.outcome }}
+          CPU_OUTCOME: ${{ steps.cpu.outcome }}
         run: |
           echo "ALU step outcome: $ALU_OUTCOME"
           echo "Regfile step outcome: $REGFILE_OUTCOME"
           echo "Control step outcome: $CONTROL_OUTCOME"
+          echo "PC step outcome: $PC_OUTCOME"
+          echo "Instruction memory step outcome: $INSTRUCTION_MEMORY_OUTCOME"
+          echo "Data memory step outcome: $DATA_MEMORY_OUTCOME"
+          echo "Datapath step outcome: $DATAPATH_OUTCOME"
+          echo "CPU step outcome: $CPU_OUTCOME"
 
           failed=0
-          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME"; do
+          for result in "$ALU_OUTCOME" "$REGFILE_OUTCOME" "$CONTROL_OUTCOME" "$PC_OUTCOME" "$INSTRUCTION_MEMORY_OUTCOME" "$DATA_MEMORY_OUTCOME" "$DATAPATH_OUTCOME" "$CPU_OUTCOME"; do
             if [ "$result" != "success" ]; then
               failed=1
             fi
@@ -83,4 +138,4 @@ jobs:
             exit 1
           fi
 
-          echo "PASS: All three testbench steps succeeded."
+          echo "PASS: All eight testbench steps succeeded."

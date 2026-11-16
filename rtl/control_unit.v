@@ -4,8 +4,8 @@
 // for the single-cycle datapath.
 //
 // Supported Instructions:
-//   R-type: add, sub, and, or, xor, slt
-//   I-type: addi, andi, ori, slti, lw, sw, beq, bne
+//   R-type: add, sub, and, or, xor, slt, sll, jr
+//   I-type: addi, andi, ori, xori, lui, slti, lw, sw, beq, bne
 //   J-type: j, jal
 
 module control_unit (
@@ -20,8 +20,10 @@ module control_unit (
     output reg         mem_read,    // 1=read from data memory
     output reg         mem_write,   // 1=write to data memory
     output reg         branch,      // 1=beq/bne branch
+    output reg         branch_ne,   // 1=bne, 0=beq when branch is asserted
     output reg         jump,        // 1=j/jal jump
     output reg         jal,         // 1=jal (write return address)
+    output reg         jr,          // 1=jr (jump to register address)
     output reg [3:0]   alu_op       // ALU operation code
 );
 
@@ -30,6 +32,8 @@ module control_unit (
     localparam OP_ADDI   = 6'b001000;  // addi
     localparam OP_ANDI   = 6'b001100;  // andi
     localparam OP_ORI    = 6'b001101;  // ori
+    localparam OP_XORI   = 6'b001110;  // xori
+    localparam OP_LUI    = 6'b001111;  // lui
     localparam OP_SLTI   = 6'b001010;  // slti
     localparam OP_LW     = 6'b100011;  // lw
     localparam OP_SW     = 6'b101011;  // sw
@@ -45,6 +49,8 @@ module control_unit (
     localparam FUNCT_OR  = 6'b100101;  // or
     localparam FUNCT_XOR = 6'b100110;  // xor
     localparam FUNCT_SLT = 6'b101010;  // slt
+    localparam FUNCT_SLL = 6'b000000;  // sll
+    localparam FUNCT_JR  = 6'b001000;  // jr
 
     // ALU operation codes (must match ALU module)
     localparam ALU_ADD  = 4'b0000;
@@ -53,6 +59,7 @@ module control_unit (
     localparam ALU_OR   = 4'b0011;
     localparam ALU_XOR  = 4'b0100;
     localparam ALU_SLT  = 4'b0101;
+    localparam ALU_SLL  = 4'b1000;
 
     // Combinational control logic
     always @(*) begin
@@ -64,8 +71,10 @@ module control_unit (
         mem_read   = 1'b0;
         mem_write  = 1'b0;
         branch     = 1'b0;
+        branch_ne  = 1'b0;
         jump       = 1'b0;
         jal        = 1'b0;
+        jr         = 1'b0;
         alu_op     = 4'b0000;
 
         case (opcode)
@@ -82,7 +91,18 @@ module control_unit (
                     FUNCT_OR:  alu_op = ALU_OR;
                     FUNCT_XOR: alu_op = ALU_XOR;
                     FUNCT_SLT: alu_op = ALU_SLT;
-                    default:   reg_write = 1'b0;  // Unsupported funct -> no write
+                    FUNCT_SLL: alu_op = ALU_SLL;
+                    FUNCT_JR: begin
+                        reg_dst   = 1'b0;
+                        reg_write = 1'b0;
+                        jr        = 1'b1;
+                    end
+                    default: begin
+                        // Unsupported funct: disable write and reset reg_dst to safe default
+                        reg_write = 1'b0;  // Unsupported funct -> no write
+                        reg_dst   = 1'b0;  // treat as unsupported: do not select rd
+                        alu_op    = 4'b0000;
+                    end
                 endcase
             end
 
@@ -110,12 +130,28 @@ module control_unit (
                 alu_op    = ALU_OR;
             end
 
+            OP_LUI: begin
+                // lui: Load Upper Immediate (shifted left 16 bits at datapath)
+                reg_dst   = 1'b0;
+                alu_src   = 1'b1;
+                reg_write = 1'b1;
+                alu_op    = ALU_ADD;
+            end
+
             OP_SLTI: begin
                 // slti: Set Less Than Immediate (sign-extended at datapath)
                 reg_dst   = 1'b0;
                 alu_src   = 1'b1;
                 reg_write = 1'b1;
                 alu_op    = ALU_SLT;
+            end
+
+            OP_XORI: begin
+                // xori: XOR Immediate (zero-extended at datapath)
+                reg_dst   = 1'b0;
+                alu_src   = 1'b1;
+                reg_write = 1'b1;
+                alu_op    = ALU_XOR;
             end
 
             OP_LW: begin
@@ -145,6 +181,7 @@ module control_unit (
             OP_BNE: begin
                 // bne: Branch if Not Equal
                 alu_src = 1'b0;
+                branch_ne = 1'b1;
                 branch  = 1'b1;
                 alu_op  = ALU_SUB;
             end

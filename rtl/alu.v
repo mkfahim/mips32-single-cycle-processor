@@ -1,7 +1,7 @@
 // ALU (Arithmetic Logic Unit) for MIPS32 Single-Cycle Processor
 //
 // Supports:
-//   - R-type operations: add, sub, and, or, xor, slt
+//   - R-type operations: add, sub, and, or, xor, slt, sll
 //   - I-type operations: addi, andi, ori, slti
 //
 // ALU Control Encoding:
@@ -13,10 +13,12 @@
 //   0101: slt (set on less than, signed)
 //   0110: addu (add unsigned)
 //   0111: subu (sub unsigned)
+//   1000: sll (logical left shift)
 
 module alu (
     input  wire [31:0] a,           // First operand
     input  wire [31:0] b,           // Second operand
+    input  wire [4:0]  shamt,       // Shift amount for shift operations
     input  wire [3:0]  alu_control, // ALU operation code
     output reg  [31:0] result,      // ALU result
     output wire        zero         // Zero flag (result == 0)
@@ -33,6 +35,7 @@ module alu (
             4'b0101: result = ($signed(a) < $signed(b)) ? 32'd1 : 32'd0;  // slt (signed)
             4'b0110: result = a + b;           // addu (same as add for 32-bit)
             4'b0111: result = a - b;           // subu (same as sub for 32-bit)
+            4'b1000: result = b << shamt;      // sll
             default: result = 32'd0;           // Default to zero
         endcase
     end
