@@ -381,11 +381,24 @@ The CPU reads `$t0` and `$t1`, adds them, and writes the result to `$t2`.
 
 ### I-type: immediate and memory operations
 
-```text
-31             26 25       21 20       16 15                         0
-+----------------+-----------+-----------+-----------------------------+
-| opcode         | rs        | rt        | immediate                   |
-+----------------+-----------+-----------+-----------------------------+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#ffffff"
+  }
+}}%%
+
+flowchart LR
+    A["opcode<br/>6 bits<br/>31–26"]
+    B["rs<br/>5 bits<br/>25–21"]
+    C["rt<br/>5 bits<br/>20–16"]
+    D["immediate<br/>16 bits<br/>15–0"]
+
+    A ~~~ B ~~~ C ~~~ D
+
+    classDef field fill:#ffffff,stroke:#111827,stroke-width:2px,color:#111827;
+    class A,B,C,D field;
 ```
 
 Example:
@@ -399,11 +412,22 @@ The CPU reads `$zero`, forms the immediate value 5, and writes the result to
 
 ### J-type: control-flow operations
 
-```text
-31             26 25                                      0
-+----------------+-----------------------------------------+
-| opcode         | target                                  |
-+----------------+-----------------------------------------+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#ffffff"
+  }
+}}%%
+
+flowchart LR
+    A["opcode<br/>6 bits<br/>31–26"]
+    B["target<br/>26 bits<br/>25–0"]
+
+    A ~~~ B
+
+    classDef field fill:#ffffff,stroke:#111827,stroke-width:2px,color:#111827;
+    class A,B field;
 ```
 
 `j` and `jal` use the target field to construct a new PC.
