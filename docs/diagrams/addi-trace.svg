@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="470" viewBox="0 0 1200 470" role="img" aria-labelledby="title desc">
+  <title id="title">Tracing addi through the datapath</title>
+  <desc id="desc">The addi instruction supplies control, register zero and an immediate to the ALU, then writes five to register t0 and advances the PC.</desc>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 Z" fill="#334155"/></marker></defs>
+  <rect width="1200" height="470" fill="#f8fafc"/>
+  <text x="600" y="38" text-anchor="middle" font-family="sans-serif" font-size="27" font-weight="700" fill="#0f172a">Tracing: addi $t0, $zero, 5</text>
+  <g font-family="sans-serif" font-size="16" fill="#0f172a" stroke="#334155" stroke-width="2">
+    <rect x="35" y="170" width="170" height="100" rx="12" fill="#dbeafe"/><text x="120" y="210" text-anchor="middle" stroke="none">Instruction</text><text x="120" y="238" text-anchor="middle" stroke="none">opcode + fields</text>
+    <rect x="250" y="80" width="190" height="100" rx="12" fill="#fef3c7"/><text x="345" y="120" text-anchor="middle" stroke="none">Control Unit</text><text x="345" y="148" text-anchor="middle" stroke="none">ADD, immediate, write</text>
+    <rect x="250" y="260" width="190" height="100" rx="12" fill="#dcfce7"/><text x="345" y="300" text-anchor="middle" stroke="none">Register File</text><text x="345" y="328" text-anchor="middle" stroke="none">$zero = 0</text>
+    <rect x="485" y="170" width="190" height="100" rx="12" fill="#ede9fe"/><text x="580" y="210" text-anchor="middle" stroke="none">Immediate</text><text x="580" y="238" text-anchor="middle" stroke="none">sign-extend 5</text>
+    <rect x="720" y="170" width="170" height="100" rx="12" fill="#e0e7ff"/><text x="805" y="210" text-anchor="middle" stroke="none">ALU</text><text x="805" y="238" text-anchor="middle" stroke="none">0 + 5 = 5</text>
+    <rect x="935" y="80" width="220" height="100" rx="12" fill="#cffafe"/><text x="1045" y="120" text-anchor="middle" stroke="none">Write-back</text><text x="1045" y="148" text-anchor="middle" stroke="none">register[8] &lt;= 5</text>
+    <rect x="935" y="260" width="220" height="100" rx="12" fill="#f1f5f9"/><text x="1045" y="300" text-anchor="middle" stroke="none">Next PC</text><text x="1045" y="328" text-anchor="middle" stroke="none">PC + 4</text>
+  </g>
+  <g stroke="#334155" stroke-width="2.5" fill="none" marker-end="url(#arrow)">
+    <path d="M205 205 H250"/><path d="M205 235 H230 Q250 235 250 290"/><path d="M440 310 H720"/><path d="M440 130 H690 Q720 130 720 190"/><path d="M675 210 H720"/><path d="M890 190 H935"/><path d="M890 250 H935"/>
+  </g>
+  <text x="600" y="425" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#475569">At the rising clock edge, the register file stores 5 in $t0.</text>
+</svg>
