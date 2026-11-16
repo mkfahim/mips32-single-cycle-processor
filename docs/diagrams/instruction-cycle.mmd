@@ -1,0 +1,10 @@
+flowchart TD
+    A["1. Fetch<br/>PC selects instruction"] --> B["2. Decode<br/>Control unit interprets opcode"]
+    B --> C["3. Read operands<br/>Register file and immediate"]
+    C --> D["4. Execute<br/>ALU calculates result or address"]
+    D --> E{"Memory instruction?"}
+    E -- No --> F["5. Write-back<br/>ALU result or PC + 4"]
+    E -- Yes --> G["5. Memory<br/>Read or write data memory"]
+    G --> F
+    F --> H["6. Select next PC<br/>PC + 4, branch, jump, or jr"]
+    H --> A

@@ -1,0 +1,10 @@
+flowchart LR
+    I["addi $t0, $zero, 5<br/>instruction[31:26] = opcode"] --> D["Control Unit<br/>alu_src=1<br/>reg_write=1<br/>alu_op=ADD"]
+    I --> R["Register File<br/>read $zero = 0<br/>destination = $t0"]
+    I --> X["Immediate Formation<br/>sign-extend 5"]
+    R --> A["ALU"]
+    X --> A
+    D --> A
+    A --> W["Write-back<br/>0 + 5 = 5"]
+    W --> E["At rising edge:<br/>register[8] <= 5"]
+    E --> N["Next PC = PC + 4"]

@@ -1,0 +1,15 @@
+flowchart LR
+    PC["pc.v<br/>Program Counter"] --> IM["instruction_memory.v<br/>Instruction Memory"]
+    IM --> CU["control_unit.v<br/>Control Unit"]
+    IM --> DP["datapath.v<br/>Datapath"]
+    CU --> DP
+    DP --> DM["data_memory.v<br/>Data Memory"]
+    DM --> DP
+    DP --> PC
+    RF["register_file.v<br/>Register File"] --- DP
+    ALU["alu.v<br/>ALU"] --- DP
+    CPU["mips32_cpu.v<br/>Top-Level CPU"] -. contains .-> PC
+    CPU -. contains .-> IM
+    CPU -. contains .-> CU
+    CPU -. contains .-> DP
+    CPU -. contains .-> DM

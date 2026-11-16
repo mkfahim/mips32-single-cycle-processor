@@ -187,14 +187,15 @@ memory, branch, or jump.
 
 Readers who are new to processor design can follow this sequence:
 
-1. Read this file to learn the vocabulary and repository layout.
-2. Read `rtl/pc.v` and `rtl/register_file.v` to see sequential state.
-3. Read `rtl/alu.v` to see pure combinational computation.
-4. Read `rtl/control_unit.v` to connect instruction fields to controls.
-5. Read `rtl/datapath.v` to follow operands, write-back, and PC selection.
-6. Read `rtl/mips32_cpu.v` to see the complete wiring.
-7. Run `tb/mips32_cpu_tb.v` and compare each instruction with the RTL.
-8. Use the documentation chapters and suggested experiments to extend it.
+1. Start with the [beginner roadmap](docs/beginner-roadmap.md).
+2. Read this file to learn the vocabulary and repository layout.
+3. Read `rtl/pc.v` and `rtl/register_file.v` to see sequential state.
+4. Read `rtl/alu.v` to see pure combinational computation.
+5. Read `rtl/control_unit.v` to connect instruction fields to controls.
+6. Read `rtl/datapath.v` to follow operands, write-back, and PC selection.
+7. Read `rtl/mips32_cpu.v` to see the complete wiring.
+8. Run `tb/mips32_cpu_tb.v` and compare each instruction with the RTL.
+9. Use the documentation chapters and suggested experiments to extend it.
 
 ## Scope and current limitations
 
@@ -219,6 +220,8 @@ learning objective.
 - [Instruction set and encodings](docs/instruction-set.md)
 - [Verification and CI](docs/verification.md)
 - [Learning notes and experiments](docs/learning-notes.md)
+- [Beginner roadmap](docs/beginner-roadmap.md)
+- [Visual diagrams and editable sources](docs/diagrams/README.md)
 
 ## License
 
