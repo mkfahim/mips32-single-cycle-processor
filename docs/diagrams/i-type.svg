@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="180" viewBox="0 0 1200 180">
+  <rect width="1200" height="180" fill="#ffffff"/>
+  <style>
+    .field { font: 700 22px sans-serif; fill: #111827; }
+    .bits { font: 400 18px sans-serif; fill: #374151; }
+    .range { font: 400 16px monospace; fill: #6b7280; }
+  </style>
+  <g transform="translate(0 35)">
+    <rect x="0" y="0" width="225" height="110" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+    <rect x="225" y="0" width="188" height="110" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+    <rect x="413" y="0" width="187" height="110" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+    <rect x="600" y="0" width="600" height="110" fill="#ffffff" stroke="#111827" stroke-width="2"/>
+    <text x="112.5" y="38" text-anchor="middle" class="field">opcode</text><text x="112.5" y="66" text-anchor="middle" class="bits">6 bits</text><text x="112.5" y="92" text-anchor="middle" class="range">31–26</text>
+    <text x="319" y="38" text-anchor="middle" class="field">rs</text><text x="319" y="66" text-anchor="middle" class="bits">5 bits</text><text x="319" y="92" text-anchor="middle" class="range">25–21</text>
+    <text x="506.5" y="38" text-anchor="middle" class="field">rt</text><text x="506.5" y="66" text-anchor="middle" class="bits">5 bits</text><text x="506.5" y="92" text-anchor="middle" class="range">20–16</text>
+    <text x="900" y="38" text-anchor="middle" class="field">immediate</text><text x="900" y="66" text-anchor="middle" class="bits">16 bits</text><text x="900" y="92" text-anchor="middle" class="range">15–0</text>
+  </g>
+</svg>

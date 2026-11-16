@@ -349,27 +349,7 @@ The processor uses three simple instruction shapes.
 
 ### R-type: register operations
 
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#ffffff"
-  }
-}}%%
-
-flowchart LR
-    A["opcode<br/>6 bits<br/>31–26"]
-    B["rs<br/>5 bits<br/>25–21"]
-    C["rt<br/>5 bits<br/>20–16"]
-    D["rd<br/>5 bits<br/>15–11"]
-    E["shamt<br/>5 bits<br/>10–6"]
-    F["funct<br/>6 bits<br/>5–0"]
-
-    A ~~~ B ~~~ C ~~~ D ~~~ E ~~~ F
-
-    classDef field fill:#ffffff,stroke:#111827,stroke-width:2px,color:#111827;
-    class A,B,C,D,E,F field;
-```
+![R-type instruction format](docs/diagrams/r-type.svg)
 
 Example:
 
@@ -381,25 +361,7 @@ The CPU reads `$t0` and `$t1`, adds them, and writes the result to `$t2`.
 
 ### I-type: immediate and memory operations
 
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#ffffff"
-  }
-}}%%
-
-flowchart LR
-    A["opcode<br/>6 bits<br/>31–26"]
-    B["rs<br/>5 bits<br/>25–21"]
-    C["rt<br/>5 bits<br/>20–16"]
-    D["immediate<br/>16 bits<br/>15–0"]
-
-    A ~~~ B ~~~ C ~~~ D
-
-    classDef field fill:#ffffff,stroke:#111827,stroke-width:2px,color:#111827;
-    class A,B,C,D field;
-```
+![I-type instruction format](docs/diagrams/i-type.svg)
 
 Example:
 
@@ -412,23 +374,7 @@ The CPU reads `$zero`, forms the immediate value 5, and writes the result to
 
 ### J-type: control-flow operations
 
-```mermaid
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#ffffff"
-  }
-}}%%
-
-flowchart LR
-    A["opcode<br/>6 bits<br/>31–26"]
-    B["target<br/>26 bits<br/>25–0"]
-
-    A ~~~ B
-
-    classDef field fill:#ffffff,stroke:#111827,stroke-width:2px,color:#111827;
-    class A,B field;
-```
+![J-type instruction format](docs/diagrams/j-type.svg)
 
 `j` and `jal` use the target field to construct a new PC.
 
