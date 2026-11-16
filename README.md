@@ -591,13 +591,15 @@ docs/
 
 ### Requirements
 
-Install Git and Icarus Verilog with SystemVerilog-2012 support.
+Install Git and at least one Verilog simulator. Icarus Verilog is the
+simplest option for beginners; Verilator is a faster compiled simulator and
+also provides useful lint checks.
 
 Ubuntu/Debian:
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y iverilog
+sudo apt-get install -y iverilog verilator
 ```
 
 ### Run the complete CPU test
@@ -622,6 +624,74 @@ vvp cpu_sim
 The testbench loads a small program into instruction memory and verifies
 register results, memory behavior, branches, jumps, `jal`, `jr`, and PC
 sequencing.
+
+### Alternative: run the complete CPU with Verilator
+
+Verilator compiles the Verilog into a native executable. The `--timing`
+option is required because the testbench contains clock delays and waits such
+as `always #5 clk = ~clk` and `@(posedge clk)`.
+
+From the repository root:
+
+```sh
+verilator --binary --timing \
+  --top-module mips32_cpu_tb \
+  tb/mips32_cpu_tb.v \
+  rtl/mips32_cpu.v \
+  rtl/pc.v \
+  rtl/instruction_memory.v \
+  rtl/data_memory.v \
+  rtl/datapath.v \
+  rtl/control_unit.v \
+  rtl/register_file.v \
+  rtl/alu.v
+
+./obj_dir/Vmips32_cpu_tb
+```
+
+The Verilator executable should print the same `PASS` checks as the Icarus
+simulation and finish with:
+
+```text
+PASS: CPU integration test completed with no failures
+```
+
+Verilator is an additional method, not a replacement for understanding the
+RTL. Icarus remains useful for simple, traditional Verilog simulation, while
+Verilator is useful for fast execution and lint-style feedback.
+
+### Generate a waveform for GTKWave
+
+GTKWave needs a waveform file such as VCD or FST. Add these lines near the
+beginning of the `initial` block in `tb/mips32_cpu_tb.v`:
+
+```verilog
+$dumpfile("cpu.vcd");
+$dumpvars(0, mips32_cpu_tb);
+```
+
+Then compile with Verilator tracing enabled:
+
+```sh
+verilator --binary --timing --trace \
+  --top-module mips32_cpu_tb \
+  tb/mips32_cpu_tb.v \
+  rtl/mips32_cpu.v \
+  rtl/pc.v \
+  rtl/instruction_memory.v \
+  rtl/data_memory.v \
+  rtl/datapath.v \
+  rtl/control_unit.v \
+  rtl/register_file.v \
+  rtl/alu.v
+
+./obj_dir/Vmips32_cpu_tb
+gtkwave cpu.vcd
+```
+
+The waveform lets you inspect signals over time, including `clk`, `reset`,
+`pc`, `instruction`, `next_pc`, memory controls, and datapath results. The
+same `$dumpfile` and `$dumpvars` lines also work with the Icarus command.
 
 ### Run an individual unit test
 
