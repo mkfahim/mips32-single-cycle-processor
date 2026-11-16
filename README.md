@@ -349,11 +349,26 @@ The processor uses three simple instruction shapes.
 
 ### R-type: register operations
 
-```text
-31             26 25       21 20       16 15       11 10        6 5       0
-+----------------+-----------+-----------+-----------+-----------+---------+
-| opcode = 0     | rs        | rt        | rd        | shamt     | funct   |
-+----------------+-----------+-----------+-----------+-----------+---------+
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#ffffff"
+  }
+}}%%
+
+flowchart LR
+    A["opcode<br/>6 bits<br/>31–26"]
+    B["rs<br/>5 bits<br/>25–21"]
+    C["rt<br/>5 bits<br/>20–16"]
+    D["rd<br/>5 bits<br/>15–11"]
+    E["shamt<br/>5 bits<br/>10–6"]
+    F["funct<br/>6 bits<br/>5–0"]
+
+    A ~~~ B ~~~ C ~~~ D ~~~ E ~~~ F
+
+    classDef field fill:#ffffff,stroke:#111827,stroke-width:2px,color:#111827;
+    class A,B,C,D,E,F field;
 ```
 
 Example:
