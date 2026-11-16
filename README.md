@@ -1,34 +1,541 @@
 # MIPS32 Single-Cycle Processor in Verilog
 
-This repository is a small, readable implementation of a MIPS32-style
-single-cycle processor. It is designed as a learning project: each hardware
-block is kept visible, the interfaces are intentionally simple, and the
-testbenches demonstrate how the blocks work together.
+> A visual, beginner-friendly journey from basic Verilog modules to a
+> working CPU.
 
-The processor is not intended to be a complete commercial MIPS
-implementation. It implements a focused instruction subset and uses
-simulation-friendly memories so that the complete fetch, decode, execute,
-memory, and write-back path can be studied in one place.
+This repository implements a small MIPS32-style single-cycle processor in
+Verilog. It is written for people who can read simple Verilog, such as an
+ALU, but who are still learning what a CPU, an instruction set, registers,
+memory, and a datapath actually are.
 
-## What “single-cycle” means here
+You do **not** need previous knowledge of:
 
-Every instruction completes in one clock period:
+- MIPS or RISC-V assembly;
+- CPU architecture;
+- instruction encoding;
+- pipelining;
+- operating systems;
+- FPGA or ASIC design.
 
-1. The program counter (PC) supplies an instruction address.
-2. Instruction memory returns the instruction.
-3. The control unit decodes the opcode and function fields.
-4. The register file supplies source operands.
-5. The ALU performs an operation or calculates an address.
-6. Data memory is read or written when required.
-7. The result is written back to the register file at the clock edge.
-8. The next PC is selected for the following cycle.
+The project is intentionally educational. The RTL is small enough to read,
+the testbenches show how each block behaves, and the diagrams connect the
+textbook concepts to the actual files in `rtl/`.
 
-The combinational work happens between rising clock edges. The PC, register
-file writes, and data-memory writes are clocked state changes.
+---
+
+## Table of contents
+
+1. [Start here](#start-here)
+2. [The big idea: what a CPU does](#the-big-idea-what-a-cpu-does)
+3. [What does single-cycle mean?](#what-does-single-cycle-mean)
+4. [The processor at a glance](#the-processor-at-a-glance)
+5. [How one instruction travels](#how-one-instruction-travels)
+6. [The repository as a book](#the-repository-as-a-book)
+7. [The beginner learning path](#the-beginner-learning-path)
+8. [The instruction formats](#the-instruction-formats)
+9. [A complete `addi` walkthrough](#a-complete-addi-walkthrough)
+10. [Loads, stores, branches, and jumps](#loads-stores-branches-and-jumps)
+11. [Current instruction subset](#current-instruction-subset)
+12. [Repository structure](#repository-structure)
+13. [Run the processor](#run-the-processor)
+14. [Understand the testbenches](#understand-the-testbenches)
+15. [Exercises for beginners](#exercises-for-beginners)
+16. [What this project does not cover](#what-this-project-does-not-cover)
+17. [Further reading](#further-reading)
+
+---
+
+## Start here
+
+If you are completely new to CPUs, follow this order:
+
+1. Read the short explanation in [The big idea](#the-big-idea-what-a-cpu-does).
+2. Look at the [CPU overview](#the-processor-at-a-glance).
+3. Read `rtl/alu.v` and run `tb/alu_tb.v`.
+4. Learn state with `rtl/pc.v` and `rtl/register_file.v`.
+5. Read the [beginner learning path](docs/beginner-roadmap.md).
+6. Run the complete CPU simulation.
+7. Read the [architecture chapter](docs/architecture.md) while following the
+   wires in `rtl/datapath.v`.
+
+Do not try to memorize every control signal on the first reading. The goal is
+to understand the journey of one instruction. Once that journey is clear, the
+individual Verilog signals become much easier to recognize.
+
+---
+
+## The big idea: what a CPU does
+
+A CPU repeatedly performs a simple loop:
+
+```text
+1. Find the next instruction.
+2. Understand what the instruction says.
+3. Read the values it needs.
+4. Calculate a result or an address.
+5. Read or write memory if required.
+6. Save the result.
+7. Decide where to find the next instruction.
+```
+
+For example, an instruction might say:
+
+```text
+addi $t0, $zero, 5
+```
+
+In plain English:
+
+> Take the value in `$zero`, add 5, and store the result in `$t0`.
+
+The CPU performs that sentence using hardware:
+
+```text
+instruction bits
+      ↓
+control unit interprets them
+      ↓
+register file supplies $zero
+      ↓
+ALU adds 0 and 5
+      ↓
+register file stores 5 in $t0
+```
+
+The ALU is only one part of the CPU. The CPU is the ALU plus storage,
+instruction interpretation, memory, and connections between those blocks.
+
+---
+
+## What does single-cycle mean?
+
+In this project, one instruction completes during one clock period. The
+processor does not use separate fetch, decode, execute, and write-back
+cycles. Those activities happen as one combinational path between clock
+edges.
+
+![Single-cycle instruction flow](docs/diagrams/instruction-cycle.svg)
+
+The important distinction is:
+
+| Combinational work | Clocked state |
+| --- | --- |
+| ALU result | Program counter |
+| Control signals | Register-file writes |
+| Immediate extension | Data-memory writes |
+| Next-PC selection | |
+
+At a rising edge, the processor remembers the new PC, register values, and
+memory values. During the rest of the cycle, combinational logic calculates
+what should happen next.
+
+This design is easy to understand because each instruction has a complete
+visible path. It is not the fastest CPU architecture, but it is an excellent
+first CPU architecture.
+
+---
+
+## The processor at a glance
+
+The top-level module is `rtl/mips32_cpu.v`. It wires together the PC,
+instruction memory, control unit, datapath, and data memory.
+
+![CPU overview](docs/diagrams/cpu-overview.svg)
+
+The large boxes in the diagram are real RTL modules:
+
+| Concept | Repository file | Responsibility |
+| --- | --- | --- |
+| Program counter | `rtl/pc.v` | Remembers the current instruction address |
+| Instruction memory | `rtl/instruction_memory.v` | Returns the instruction at the PC |
+| Control unit | `rtl/control_unit.v` | Interprets opcode and function fields |
+| Register file | `rtl/register_file.v` | Stores 32 general-purpose registers |
+| ALU | `rtl/alu.v` | Performs arithmetic and logical operations |
+| Datapath | `rtl/datapath.v` | Connects operands, results, memory, and PC choices |
+| Data memory | `rtl/data_memory.v` | Stores and returns program data |
+| Complete CPU | `rtl/mips32_cpu.v` | Instantiates and wires everything together |
+
+The datapath is the road system of the processor. Values travel along wires,
+and multiplexers choose which road a value takes.
+
+---
+
+## How one instruction travels
+
+Every supported instruction follows the same broad story:
+
+### 1. Fetch
+
+The PC supplies a byte address. Instruction memory uses that address to
+return a 32-bit instruction.
+
+Normal sequential execution advances by four bytes:
+
+```text
+next PC = current PC + 4
+```
+
+Instructions are four bytes wide, so the low two address bits must be zero.
+
+### 2. Decode
+
+The control unit reads the instruction's opcode and, for R-type instructions,
+its function field. It produces signals such as:
+
+- should the ALU use a register or an immediate?
+- should the result be written to `rd` or `rt`?
+- should data memory be read or written?
+- is this a branch or jump?
+- which ALU operation is required?
+
+### 3. Read operands
+
+The register file reads two registers at the same time. The datapath also
+forms a 32-bit immediate from the instruction's 16-bit field.
+
+Different instructions use different immediate rules:
+
+- arithmetic offsets are sign-extended;
+- logical immediates are zero-extended;
+- `lui` moves the value into the upper 16 bits;
+- branch offsets are shifted left by two.
+
+### 4. Execute
+
+The ALU performs the operation. For a memory instruction, the ALU calculates
+an effective address:
+
+```text
+effective address = base register + offset
+```
+
+For a branch, subtraction produces the `zero` flag used to decide equality.
+
+### 5. Memory
+
+`lw` reads data memory. `sw` writes data memory. Other instructions do not
+access data memory.
+
+### 6. Write back
+
+The result can come from:
+
+- the ALU;
+- data memory;
+- `PC + 4` for `jal`.
+
+The destination can be `rd`, `rt`, or register 31 (`$ra`).
+
+### 7. Select the next PC
+
+The datapath chooses between:
+
+```text
+PC + 4
+branch target
+jump target
+register target for jr
+```
+
+The current priority is `jr`, then `j`/`jal`, then a taken branch, then the
+normal sequential address.
+
+---
+
+## The repository as a book
+
+The project is organized as a sequence of chapters. Each chapter has three
+parts:
+
+1. a hardware idea;
+2. an RTL module;
+3. an executable testbench.
+
+| Chapter | Read | Then run |
+| --- | --- | --- |
+| 1. Combinational logic | `rtl/alu.v` | `tb/alu_tb.v` |
+| 2. Clocked state | `rtl/pc.v` | `tb/pc_tb.v` |
+| 3. Register storage | `rtl/register_file.v` | `tb/register_file_tb.v` |
+| 4. Program storage | `rtl/instruction_memory.v` | `tb/instruction_memory_tb.v` |
+| 5. Instruction interpretation | `rtl/control_unit.v` | `tb/control_unit_tb.v` |
+| 6. Data storage | `rtl/data_memory.v` | `tb/data_memory_tb.v` |
+| 7. Connecting the datapath | `rtl/datapath.v` | `tb/datapath_tb.v` |
+| 8. The complete machine | `rtl/mips32_cpu.v` | `tb/mips32_cpu_tb.v` |
+
+The full beginner course is in
+[`docs/beginner-roadmap.md`](docs/beginner-roadmap.md). It explains the
+same sequence in lesson form and includes exercises.
+
+---
+
+## The beginner learning path
+
+### Chapter 1: Begin with the ALU
+
+Start with a circuit you already understand. The ALU receives two 32-bit
+values and an operation code, then produces a result and a zero flag.
+
+```verilog
+result = a + b;
+```
+
+At this stage, there is no memory and no instruction decoding. The ALU only
+reacts to its inputs. This is combinational logic.
+
+Questions to answer:
+
+- What changes when `a` changes?
+- Why does the ALU not need a clock?
+- How is signed `slt` different from bitwise operations?
+- Why is the zero flag useful for branches?
+
+### Chapter 2: Add time with the PC
+
+The PC is a 32-bit register. Unlike the ALU, it remembers a value across
+clock edges:
+
+```verilog
+always @(posedge clk) begin
+    pc <= next_pc;
+end
+```
+
+Reset gives the processor a known starting address.
+
+### Chapter 3: Add registers
+
+The register file contains 32 registers. A five-bit address selects one:
+
+```text
+2^5 = 32
+```
+
+It has two asynchronous read ports and one synchronous write port. `$zero`
+is hard-wired to zero, which is a common and useful CPU convention.
+
+### Chapter 4: Store instructions
+
+Instruction memory maps addresses to 32-bit instruction words. In simulation,
+the memory can be initialized with `$readmemh` or directly by a testbench.
+
+This is the point where a bit pattern becomes an instruction.
+
+### Chapter 5: Decode instructions
+
+The control unit is an interpreter implemented as combinational RTL. It maps
+instruction fields to control signals. For unsupported instructions, the
+default controls are safe and inert.
+
+### Chapter 6: Store data
+
+Data memory is separate from instruction memory. A store changes memory at a
+clock edge; a read returns data combinationally.
+
+### Chapter 7: Connect the datapath
+
+The datapath combines the register file, immediate formation, ALU, write-back
+muxes, branch logic, and jump logic.
+
+### Chapter 8: Build the complete CPU
+
+The top-level CPU connects the pieces and executes a small program. At this
+point, the processor is no longer a collection of isolated modules: it is a
+machine that changes state according to instructions.
+
+---
+
+## The instruction formats
+
+The processor uses three simple instruction shapes.
+
+### R-type: register operations
+
+```text
+31             26 25       21 20       16 15       11 10        6 5       0
++----------------+-----------+-----------+-----------+-----------+---------+
+| opcode = 0     | rs        | rt        | rd        | shamt     | funct   |
++----------------+-----------+-----------+-----------+-----------+---------+
+```
+
+Example:
+
+```text
+add $t2, $t0, $t1
+```
+
+The CPU reads `$t0` and `$t1`, adds them, and writes the result to `$t2`.
+
+### I-type: immediate and memory operations
+
+```text
+31             26 25       21 20       16 15                         0
++----------------+-----------+-----------+-----------------------------+
+| opcode         | rs        | rt        | immediate                   |
++----------------+-----------+-----------+-----------------------------+
+```
+
+Example:
+
+```text
+addi $t0, $zero, 5
+```
+
+The CPU reads `$zero`, forms the immediate value 5, and writes the result to
+`$t0`.
+
+### J-type: control-flow operations
+
+```text
+31             26 25                                      0
++----------------+-----------------------------------------+
+| opcode         | target                                  |
++----------------+-----------------------------------------+
+```
+
+`j` and `jal` use the target field to construct a new PC.
+
+More complete encoding tables are in
+[`docs/instruction-set.md`](docs/instruction-set.md).
+
+---
+
+## A complete `addi` walkthrough
+
+We will trace:
+
+```text
+addi $t0, $zero, 5
+```
+
+### Instruction bits arrive
+
+Instruction memory returns a 32-bit value. The control unit sees the opcode
+for `addi`.
+
+### The control unit decides
+
+The important controls are conceptually:
+
+```text
+alu_src   = 1       // use the immediate as ALU input B
+reg_dst   = 0       // destination is rt
+reg_write = 1       // write a register
+alu_op    = ADD
+```
+
+No memory access and no branch are enabled.
+
+### The register file reads `$zero`
+
+Register 0 always returns zero:
+
+```text
+register_data1 = 0
+```
+
+### The immediate is extended
+
+The 16-bit value 5 becomes:
+
+```text
+0x00000005
+```
+
+### The ALU calculates
+
+```text
+0 + 5 = 5
+```
+
+### The destination is selected
+
+For an I-type instruction, the destination is `rt`. In this encoding, `rt`
+is register 8, conventionally named `$t0`.
+
+### The clock edge saves the result
+
+At the rising edge:
+
+```text
+register[8] <= 5
+```
+
+The next PC is `PC + 4`.
+
+![Tracing addi through the datapath](docs/diagrams/addi-trace.svg)
+
+This is the most important walkthrough in the repository. Every other
+instruction is a variation on which values are selected, which operation is
+performed, and which state is updated.
+
+---
+
+## Loads, stores, branches, and jumps
+
+### `lw`: load a word
+
+```text
+lw $t0, 4($t1)
+```
+
+1. Read `$t1`.
+2. Sign-extend 4.
+3. Add them in the ALU.
+4. Read data memory at the resulting address.
+5. Write the memory value into `$t0`.
+
+### `sw`: store a word
+
+```text
+sw $t0, 4($t1)
+```
+
+1. Read `$t1` as the base.
+2. Sign-extend 4.
+3. Add them in the ALU.
+4. Send `$t0` as memory write data.
+5. Store it at the clock edge.
+
+### `beq`: branch if equal
+
+```text
+beq $t0, $t1, offset
+```
+
+The ALU subtracts the operands. If the result is zero, the target is:
+
+```text
+PC + 4 + (sign_extended_offset << 2)
+```
+
+The shift by two converts an instruction offset into a byte offset.
+
+### `bne`: branch if not equal
+
+`bne` uses the same subtraction, but takes the branch when the ALU zero flag
+is false. The explicit `branch_ne` signal tells the datapath to invert the
+condition.
+
+### `j`: jump
+
+`j` builds a target from the instruction's 26-bit field and the upper four
+bits of `PC + 4`.
+
+### `jal` and `jr`: call and return
+
+`jal`:
+
+```text
+$ra = PC + 4
+PC  = jump target
+```
+
+`jr $ra` reads register 31 and uses it as the next PC. The integration
+testbench demonstrates this complete call-and-return path.
+
+---
 
 ## Current instruction subset
-
-The supported instructions are:
 
 | Class | Instructions |
 | --- | --- |
@@ -36,44 +543,56 @@ The supported instructions are:
 | I-type | `addi`, `andi`, `ori`, `xori`, `lui`, `slti`, `lw`, `sw`, `beq`, `bne` |
 | J-type | `j`, `jal` |
 
-Instruction encodings, immediate rules, and the current implementation
-limitations are described in [`docs/instruction-set.md`](docs/instruction-set.md).
+The implementation uses these conventions:
 
-## Repository map
+- register 0 (`$zero`) always reads as zero;
+- register 31 (`$ra`) stores the return address for `jal`;
+- instruction and data addresses must be word-aligned;
+- invalid memory addresses read as zero and ignore writes;
+- reset is synchronous and active high;
+- unsupported instructions safely advance the PC without changing state.
+
+---
+
+## Repository structure
 
 ```text
 rtl/
   alu.v                 Arithmetic and logic operations
-  control_unit.v        Opcode/funct decoding and control signals
+  control_unit.v        Opcode and function decoding
   data_memory.v         Combinational-read, clocked-write data memory
-  datapath.v            Register, ALU, write-back, and next-PC datapath
+  datapath.v            Operands, ALU, write-back, and next-PC logic
   instruction_memory.v  Read-only instruction memory
-  mips32_cpu.v          Top-level processor
+  mips32_cpu.v          Complete top-level CPU
   pc.v                  Program counter
-  register_file.v       32-register file with two async reads
+  register_file.v       32 registers with two asynchronous reads
 
 tb/
-  *_tb.v                Unit, datapath, and end-to-end testbenches
+  alu_tb.v
+  control_unit_tb.v
+  data_memory_tb.v
+  datapath_tb.v
+  instruction_memory_tb.v
+  mips32_cpu_tb.v
+  pc_tb.v
+  register_file_tb.v
 
 docs/
-  architecture.md       Hardware organization and instruction flow
+  beginner-roadmap.md   Beginner course and exercises
+  architecture.md       Datapath and control explanation
   instruction-set.md    Encodings and supported behavior
-  verification.md       Simulation and CI strategy
-  learning-notes.md     Design decisions and suggested experiments
+  verification.md       Testbench and CI strategy
+  learning-notes.md     Design decisions and experiments
+  diagrams/             Mermaid sources and rendered SVG visuals
 ```
 
-The RTL is intentionally organized around the processor data path rather than
-around a software-style abstraction layer. Reading `mips32_cpu.v` first gives
-the top-level connections; reading `datapath.v` next shows how an instruction
-flows through the machine.
+---
 
-## Requirements
+## Run the processor
 
-For local simulation, install:
+### Requirements
 
-- Git
-- Icarus Verilog with SystemVerilog-2012 support
-- `vvp` (normally installed with Icarus Verilog)
+Install Git and Icarus Verilog with SystemVerilog-2012 support.
 
 Ubuntu/Debian:
 
@@ -82,7 +601,7 @@ sudo apt-get update
 sudo apt-get install -y iverilog
 ```
 
-## Run the complete CPU simulation
+### Run the complete CPU test
 
 From the repository root:
 
@@ -101,127 +620,122 @@ iverilog -g2012 -o cpu_sim \
 vvp cpu_sim
 ```
 
-The testbench loads a small program directly into the instruction-memory
-array. It then advances the clock and checks register values, memory values,
-and PC transitions. A successful run ends with:
+The testbench loads a small program into instruction memory and verifies
+register results, memory behavior, branches, jumps, `jal`, `jr`, and PC
+sequencing.
 
-```text
-PASS: CPU integration test completed with no failures
-```
+### Run an individual unit test
 
-Generated simulation binaries are local artifacts and are ignored by the
-repository's `.gitignore`.
-
-## Run an individual unit test
-
-For example, to test only the ALU:
+For the ALU:
 
 ```sh
 iverilog -g2012 -o alu_sim tb/alu_tb.v rtl/alu.v
 vvp alu_sim
 ```
 
-The other unit tests follow the same pattern. The exact source lists used by
-continuous integration are in [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+The other unit tests use the same compile-and-run pattern. CI runs all eight
+testbenches on pushes, pull requests, and manual workflow dispatches.
 
-## Processor parameters
+---
 
-The top-level module is:
+## Understand the testbenches
 
-```verilog
-mips32_cpu #(
-    .IM_ADDR_WIDTH(8),
-    .DM_ADDR_WIDTH(8),
-    .IM_INIT_FILE(""),
-    .DM_INIT_FILE("")
-) cpu (
-    .clk(clk),
-    .reset(reset),
-    .pc(pc)
-);
-```
+Verification is layered:
 
-`IM_ADDR_WIDTH` and `DM_ADDR_WIDTH` select the number of address-index bits.
-Each memory contains `2**ADDR_WIDTH` 32-bit words. Because instructions and
-data are words, the low two address bits are used for alignment and are not
-part of the word index.
+| Level | What it proves |
+| --- | --- |
+| ALU test | Operations and zero flag |
+| Register-file test | Reads, writes, reset, and `$zero` |
+| Control-unit test | Decoding and safe defaults |
+| PC test | Reset and next-PC loading |
+| Instruction-memory test | Alignment, bounds, and reads |
+| Data-memory test | Reads, writes, reset, alignment, and bounds |
+| Datapath test | Muxes, write-back, branches, jumps, and memory interface |
+| CPU test | Complete program execution |
 
-When an initialization filename is supplied, the memory uses Verilog
-`$readmemh`. An empty filename leaves the memory zero-initialized. The
-testbench can also initialize memories hierarchically, which is convenient
-for small educational programs.
+Each testbench is an executable specification. Read the test before the RTL
+when a module feels unfamiliar: the checks explain what behavior the module
+promises.
 
-## Important behavioral conventions
+More detail is available in [`docs/verification.md`](docs/verification.md).
 
-### Reset
+---
 
-Reset is synchronous and active high:
+## Exercises for beginners
 
-- `pc.v` resets the PC to address `0` on a rising edge.
-- `register_file.v` clears all 32 registers on a rising edge.
-- `data_memory.v` clears all data words on a rising edge.
+Try to answer each question before running the simulation.
 
-The testbenches therefore hold `reset` high across a clock edge before
-executing the first instruction.
+### Exercise 1: change an immediate
 
-### Register file
+Change `addi $t0, $zero, 5` to use 12. Predict the register value and PC.
 
-The register file has two asynchronous read ports and one synchronous write
-port. Register `$zero` always reads as zero, and writes to register zero are
-ignored. Register `$ra` is register 31 and receives `PC + 4` for `jal`.
+### Exercise 2: observe sign extension
 
-### Memory
+Use an immediate of `16'hffff` with `addi`. Predict the 32-bit ALU operand.
+Then compare it with the same bit pattern used by `andi`.
 
-Instruction and data addresses must be word-aligned. Invalid or out-of-range
-addresses return zero on reads and are ignored on writes. Data-memory reads
-are combinational; data-memory writes occur on the rising edge when
-`mem_write` is asserted.
+### Exercise 3: follow an R-type instruction
 
-### Control safety
+Trace `add $t2, $t0, $t1`:
 
-The control unit starts every decode with safe defaults. Unsupported opcodes
-and unsupported R-type function codes do not write a register, access data
-memory, branch, or jump.
+- Which fields select `$t0` and `$t1`?
+- Which field selects `$t2`?
+- Why is `reg_dst` asserted?
 
-## Suggested reading order
+### Exercise 4: break and repair a branch
 
-Readers who are new to processor design can follow this sequence:
+Temporarily make `bne` use the same condition as `beq`. Run the testbench,
+observe the failure, and restore `branch_ne`.
 
-1. Start with the [beginner roadmap](docs/beginner-roadmap.md).
-2. Read this file to learn the vocabulary and repository layout.
-3. Read `rtl/pc.v` and `rtl/register_file.v` to see sequential state.
-4. Read `rtl/alu.v` to see pure combinational computation.
-5. Read `rtl/control_unit.v` to connect instruction fields to controls.
-6. Read `rtl/datapath.v` to follow operands, write-back, and PC selection.
-7. Read `rtl/mips32_cpu.v` to see the complete wiring.
-8. Run `tb/mips32_cpu_tb.v` and compare each instruction with the RTL.
-9. Use the documentation chapters and suggested experiments to extend it.
+### Exercise 5: inspect a memory transaction
 
-## Scope and current limitations
+Add displays for `data_mem_address`, `data_mem_write_data`, `data_mem_read`,
+and `data_mem_write`. Compare `lw` and `sw`.
 
-This is a teaching implementation, so it deliberately leaves out features
-that would distract from the single-cycle datapath:
+### Exercise 6: add a new instruction
 
-- It has no pipeline, forwarding, hazard detection, cache, or exception unit.
-- It does not implement coprocessors, interrupts, privileged modes, or delay
-  slots.
-- The instruction and data memories are simple simulation memories, not
-  synthesizable memory-controller interfaces.
-- The supported ISA is the subset listed above; unsupported instructions
-  safely become no-operations rather than raising exceptions.
-- Arithmetic overflow is not reported separately.
+Add one simple instruction through the complete workflow:
 
-These are useful directions for future study, not bugs in the current
-learning objective.
+1. define its encoding;
+2. update the ALU if needed;
+3. update the control unit;
+4. update the datapath if needed;
+5. add focused tests;
+6. add an end-to-end program test;
+7. update the instruction documentation.
 
-## Further documentation
+Suggested first additions are `addu` or `subu`.
 
+---
+
+## What this project does not cover
+
+This processor is intentionally small. It does not yet include:
+
+- pipelining;
+- forwarding or hazard detection;
+- caches;
+- exceptions and interrupts;
+- privileged modes or operating systems;
+- coprocessors;
+- branch delay slots;
+- arithmetic overflow exceptions;
+- a real memory bus or memory controller;
+- synthesis-specific timing constraints.
+
+These are not missing prerequisites for understanding this repository. They
+are the next chapters after the single-cycle design becomes familiar.
+
+---
+
+## Further reading
+
+- [Beginner roadmap](docs/beginner-roadmap.md)
 - [Architecture and datapath](docs/architecture.md)
 - [Instruction set and encodings](docs/instruction-set.md)
 - [Verification and CI](docs/verification.md)
 - [Learning notes and experiments](docs/learning-notes.md)
-- [Beginner roadmap](docs/beginner-roadmap.md)
-- [Visual diagrams and editable sources](docs/diagrams/README.md)
+- [Visual diagrams and editable Mermaid sources](docs/diagrams/README.md)
 
 ## License
 
