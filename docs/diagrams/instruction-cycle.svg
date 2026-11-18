@@ -1,20 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="760" viewBox="0 0 900 760" role="img" aria-labelledby="title desc">
   <title id="title">Single-cycle instruction flow</title>
-  <desc id="desc">A loop showing fetch, decode, operand read, execute, optional memory access, write-back, and next PC selection.</desc>
+  <desc id="desc">A loop showing fetch, decode, register and immediate read, execute, a memory-instruction decision, optional memory access, write-back, and next PC selection.</desc>
   <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L10,3 L0,6 Z" fill="#334155"/></marker></defs>
   <rect width="900" height="760" fill="#f8fafc"/>
   <text x="450" y="40" text-anchor="middle" font-family="sans-serif" font-size="27" font-weight="700" fill="#0f172a">One instruction in a single-cycle CPU</text>
   <g font-family="sans-serif" font-size="18" fill="#0f172a" stroke="#334155" stroke-width="2">
-    <rect x="285" y="75" width="330" height="62" rx="12" fill="#dbeafe"/><text x="450" y="113" text-anchor="middle" stroke="none">1. Fetch: PC → instruction</text>
+    <rect x="285" y="75" width="330" height="62" rx="12" fill="#dbeafe"/><text x="450" y="113" text-anchor="middle" stroke="none">1. Fetch: PC selects instruction</text>
     <rect x="285" y="170" width="330" height="62" rx="12" fill="#fef3c7"/><text x="450" y="208" text-anchor="middle" stroke="none">2. Decode: control signals</text>
     <rect x="285" y="265" width="330" height="62" rx="12" fill="#dcfce7"/><text x="450" y="303" text-anchor="middle" stroke="none">3. Read registers / immediate</text>
     <rect x="285" y="360" width="330" height="62" rx="12" fill="#ede9fe"/><text x="450" y="398" text-anchor="middle" stroke="none">4. Execute with the ALU</text>
-    <rect x="115" y="485" width="280" height="62" rx="12" fill="#fee2e2"/><text x="255" y="523" text-anchor="middle" stroke="none">5a. Access data memory</text>
-    <rect x="505" y="485" width="280" height="62" rx="12" fill="#e0e7ff"/><text x="645" y="523" text-anchor="middle" stroke="none">5b. No memory access</text>
+    <path d="M450 420 L520 455 L450 490 L380 455 Z" fill="#fff7ed"/>
+    <text x="450" y="451" text-anchor="middle" stroke="none" font-size="16">Memory instruction?</text>
+    <text x="350" y="448" text-anchor="end" stroke="none" font-size="14">Yes: access data memory</text>
+    <text x="550" y="448" text-anchor="start" stroke="none" font-size="14">No: skip data memory</text>
+    <rect x="115" y="525" width="280" height="62" rx="12" fill="#fee2e2"/><text x="255" y="563" text-anchor="middle" stroke="none">5a. Access data memory</text>
+    <rect x="505" y="525" width="280" height="62" rx="12" fill="#e0e7ff"/><text x="645" y="563" text-anchor="middle" stroke="none">5b. No memory access</text>
     <rect x="285" y="610" width="330" height="62" rx="12" fill="#cffafe"/><text x="450" y="648" text-anchor="middle" stroke="none">6. Write-back and choose next PC</text>
   </g>
   <g stroke="#334155" stroke-width="2.5" fill="none" marker-end="url(#arrow)">
-    <path d="M450 137 V170"/><path d="M450 232 V265"/><path d="M450 327 V360"/><path d="M450 422 V450 L255 450 V485"/><path d="M450 422 V450 L645 450 V485"/><path d="M255 547 V580 L450 580 V610"/><path d="M645 547 V580 L450 580 V610"/><path d="M285 641 H170 Q80 641 80 110 Q80 75 285 75"/>
+    <path d="M450 137 V170"/><path d="M450 232 V265"/><path d="M450 327 V360"/><path d="M450 422 V420"/><path d="M380 455 L255 455 V525"/><path d="M520 455 L645 455 V525"/><path d="M255 587 V610 L450 610 V610"/><path d="M645 587 V610 L450 610 V610"/><path d="M285 641 H170 Q80 641 80 110 Q80 75 285 75"/>
   </g>
   <text x="450" y="715" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#475569">The clock edge captures register, memory, and PC state.</text>
 </svg>
