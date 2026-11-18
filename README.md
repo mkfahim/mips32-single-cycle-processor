@@ -117,6 +117,10 @@ Patterson and Hennessy [5].
 
 ![Single-cycle instruction flow](docs/diagrams/instruction-cycle.svg)
 
+<p align="center">
+  <small><em><strong>Figure 1.</strong> Single-cycle instruction flow from fetch through write-back.</em></small>
+</p>
+
 Keep this distinction in mind:
 
 | Combinational work | Clocked state |
@@ -142,6 +146,10 @@ The top-level module is `rtl/mips32_cpu.v`. It wires together the PC,
 instruction memory, control unit, datapath, and data memory.
 
 ![CPU overview](docs/diagrams/cpu-overview.svg)
+
+<p align="center">
+  <small><em><strong>Figure 2.</strong> Organization of the MIPS32 processor and its primary modules.</em></small>
+</p>
 
 The large boxes in the diagram correspond to real RTL modules:
 
@@ -354,6 +362,10 @@ The processor uses three simple instruction shapes.
 
 ![R-type instruction format](docs/diagrams/r-type.svg)
 
+<p align="center">
+  <small><em><strong>Figure 3.</strong> Field encoding of R-type MIPS32 instructions.</em></small>
+</p>
+
 Example:
 
 ```text
@@ -365,6 +377,10 @@ The CPU reads `$t0` and `$t1`, adds them, and writes the result to `$t2`.
 ### I-type: immediate and memory operations
 
 ![I-type instruction format](docs/diagrams/i-type.svg)
+
+<p align="center">
+  <small><em><strong>Figure 4.</strong> Field encoding of I-type MIPS32 instructions.</em></small>
+</p>
 
 Example:
 
@@ -378,6 +394,10 @@ The CPU reads `$zero`, forms the immediate value 5, and writes the result to
 ### J-type: control-flow operations
 
 ![J-type instruction format](docs/diagrams/j-type.svg)
+
+<p align="center">
+  <small><em><strong>Figure 5.</strong> Field encoding of J-type MIPS32 instructions.</em></small>
+</p>
 
 `j` and `jal` use the target field to construct a new PC.
 
@@ -453,6 +473,10 @@ register[8] <= 5
 The next PC is `PC + 4`.
 
 ![Tracing addi through the datapath](docs/diagrams/addi-trace.svg)
+
+<p align="center">
+  <small><em><strong>Figure 6.</strong> Datapath trace for the `addi $t0, $zero, 5` instruction.</em></small>
+</p>
 
 This is the most important walkthrough in the repository. Every other
 instruction is a variation on which values are selected, which operation is

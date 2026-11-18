@@ -41,12 +41,20 @@ resulting state is captured at the rising edge.
 
 ![Instruction cycle](diagrams/instruction-cycle.svg)
 
+<p align="center">
+  <small><em><strong>Figure 1.</strong> Single-cycle instruction flow from fetch through write-back.</em></small>
+</p>
+
 The arrows form a loop because the completed instruction produces the next
 PC, and that next PC begins the following instruction.
 
 ## How the repository maps to the picture
 
 ![CPU overview](diagrams/cpu-overview.svg)
+
+<p align="center">
+  <small><em><strong>Figure 2.</strong> Organization of the MIPS32 processor and its primary modules.</em></small>
+</p>
 
 The large boxes in this picture are not abstract textbook names. They are
 the modules in `rtl/`. The top-level `mips32_cpu.v` instantiates and wires
@@ -214,6 +222,10 @@ This is the smallest useful complete CPU story: instruction bits become
 control signals, control signals move data, and a clock edge saves the result.
 
 ![Tracing addi](diagrams/addi-trace.svg)
+
+<p align="center">
+  <small><em><strong>Figure 3.</strong> Datapath trace for the `addi $t0, $zero, 5` instruction.</em></small>
+</p>
 
 ## Lesson 7: Follow `lw` and `sw`
 
