@@ -533,6 +533,11 @@ testbench demonstrates this complete call-and-return path.
 | I-type | `addi`, `andi`, `ori`, `xori`, `lui`, `slti`, `lw`, `sw`, `beq`, `bne` |
 | J-type | `j`, `jal` |
 
+> **Compatibility note:** This is an educational MIPS32-style subset, not a
+> fully compliant MIPS32 implementation. It intentionally omits features such
+> as delay slots, exceptions, interrupts, privileged modes, and overflow
+> handling.
+
 Use these implementation conventions:
 
 - register 0 (`$zero`) always reads as zero;
