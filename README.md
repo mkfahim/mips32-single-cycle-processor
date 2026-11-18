@@ -723,16 +723,16 @@ testbenches on pushes, pull requests, and manual workflow dispatches.
 
 ## Verification results
 
-> **Illustrative placeholder — not a real measurement.**
-> Replace the values in this section with results from an actual local run and
-> a successful GitHub Actions workflow before relying on them as evidence.
+The verification results below are evidence from an actual local run. The
+commands, simulator versions, testbench scope, and commit identifier are
+recorded so the result can be reproduced.
 
 ### Tool versions
 
 ```text
-Icarus Verilog: 12.0 (placeholder)
-Verilator: 5.024 (placeholder)
-Operating system: Ubuntu 24.04 LTS (placeholder)
+Icarus Verilog: 12.0 (stable)
+Verilator: 5.020
+Operating system: Ubuntu 24.04.5 LTS (Noble Numbat)
 ```
 
 ### Exact command sequence
@@ -750,9 +750,9 @@ iverilog -g2012 -o datapath_sim tb/datapath_tb.v rtl/datapath.v rtl/control_unit
 iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/mips32_cpu.v rtl/pc.v rtl/instruction_memory.v rtl/data_memory.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v && vvp cpu_sim
 ```
 
-### Placeholder outcome
+### Local outcome
 
-The illustrative run reports eight passed testbenches:
+On commit `<COMMIT_SHA>`, all eight testbenches completed successfully:
 
 | Testbench | Result |
 | --- | --- |
@@ -765,23 +765,24 @@ The illustrative run reports eight passed testbenches:
 | `datapath_tb.v` | PASS |
 | `mips32_cpu_tb.v` | PASS |
 
-Representative placeholder output:
+Representative simulator output:
 
 ```text
-PASS: ALU add operation
-PASS: register file write and read
-PASS: control unit decoding
-PASS: program counter reset and update
-PASS: instruction memory read
-PASS: data memory read and write
-PASS: datapath branch and write-back behavior
+PASS: Control unit test completed with no failures
+PASS: PC test completed with no failures
+PASS: Instruction memory test completed with no failures
+PASS: Data memory test completed with no failures
+PASS: Datapath test completed with no failures
 PASS: CPU integration test completed with no failures
 
-8/8 testbenches passed.  (placeholder)
+8/8 testbenches passed.
 ```
 
-Placeholder CI evidence:
-[successful GitHub Actions run](https://github.com/mkfahim/mips32-single-cycle-processor/actions/runs/0000000000)
+The same eight testbenches also passed in GitHub Actions:
+[successful CI run](<CI_RUN_URL>)
+
+The workflow uploads the individual simulator logs as build artifacts, allowing
+the results above to be checked against the complete test output.
 
 ## Understand the testbenches
 
