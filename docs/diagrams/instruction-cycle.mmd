@@ -1,10 +1,13 @@
 flowchart TD
-    A["1. Fetch<br/>PC selects instruction"] --> B["2. Decode<br/>Control unit interprets opcode"]
-    B --> C["3. Read operands<br/>Register file and immediate"]
-    C --> D["4. Execute<br/>ALU calculates result or address"]
+    A["1. Fetch: PC selects instruction"] --> B["2. Decode: control signals"]
+    B --> C["3. Read registers / immediate"]
+    C --> D["4. Execute with the ALU"]
     D --> E{"Memory instruction?"}
-    E -- No --> F["5. Write-back<br/>ALU result or PC + 4"]
-    E -- Yes --> G["5. Memory<br/>Read or write data memory"]
-    G --> F
-    F --> H["6. Select next PC<br/>PC + 4, branch, jump, or jr"]
+    E -- "Yes: access data memory" --> F["5a. Access data memory"]
+    E -- "No: skip data memory" --> G["5b. No memory access"]
+    F --> H["6. Write-back and choose next PC"]
+    G --> H
     H --> A
+
+
+%% The clock edge captures register, memory, and PC state.
