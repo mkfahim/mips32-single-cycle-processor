@@ -716,6 +716,68 @@ testbenches on pushes, pull requests, and manual workflow dispatches.
 
 ---
 
+## Verification results
+
+> **Illustrative placeholder — not a real measurement.**
+> Replace the values in this section with results from an actual local run and
+> a successful GitHub Actions workflow before relying on them as evidence.
+
+### Tool versions
+
+```text
+Icarus Verilog: 12.0 (placeholder)
+Verilator: 5.024 (placeholder)
+Operating system: Ubuntu 24.04 LTS (placeholder)
+```
+
+### Exact command sequence
+
+From the repository root:
+
+```sh
+iverilog -g2012 -o alu_sim tb/alu_tb.v rtl/alu.v && vvp alu_sim
+iverilog -g2012 -o regfile_sim tb/register_file_tb.v rtl/register_file.v && vvp regfile_sim
+iverilog -g2012 -o control_unit_sim tb/control_unit_tb.v rtl/control_unit.v && vvp control_unit_sim
+iverilog -g2012 -o pc_sim tb/pc_tb.v rtl/pc.v && vvp pc_sim
+iverilog -g2012 -o instruction_memory_sim tb/instruction_memory_tb.v rtl/instruction_memory.v && vvp instruction_memory_sim
+iverilog -g2012 -o data_memory_sim tb/data_memory_tb.v rtl/data_memory.v && vvp data_memory_sim
+iverilog -g2012 -o datapath_sim tb/datapath_tb.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v && vvp datapath_sim
+iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/mips32_cpu.v rtl/pc.v rtl/instruction_memory.v rtl/data_memory.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v && vvp cpu_sim
+```
+
+### Placeholder outcome
+
+The illustrative run reports eight passed testbenches:
+
+| Testbench | Result |
+| --- | --- |
+| `alu_tb.v` | PASS |
+| `register_file_tb.v` | PASS |
+| `control_unit_tb.v` | PASS |
+| `pc_tb.v` | PASS |
+| `instruction_memory_tb.v` | PASS |
+| `data_memory_tb.v` | PASS |
+| `datapath_tb.v` | PASS |
+| `mips32_cpu_tb.v` | PASS |
+
+Representative placeholder output:
+
+```text
+PASS: ALU add operation
+PASS: register file write and read
+PASS: control unit decoding
+PASS: program counter reset and update
+PASS: instruction memory read
+PASS: data memory read and write
+PASS: datapath branch and write-back behavior
+PASS: CPU integration test completed with no failures
+
+8/8 testbenches passed.  (placeholder)
+```
+
+Placeholder CI evidence:
+[successful GitHub Actions run](https://github.com/mkfahim/mips32-single-cycle-processor/actions/runs/0000000000)
+
 ## Understand the testbenches
 
 Verification is layered:
