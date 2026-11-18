@@ -41,6 +41,7 @@ connect textbook concepts to the actual files in `rtl/`.
 14. [Understand the testbenches](#understand-the-testbenches)
 15. [What this project does not cover](#what-this-project-does-not-cover)
 16. [Further reading](#further-reading)
+17. [References](#references)
 
 ---
 
@@ -111,6 +112,8 @@ instruction interpretation, memory, and connections between those blocks.
 Here, one instruction completes during one clock period. The processor does not
 use separate fetch, decode, execute, and write-back cycles; those activities
 happen as one combinational path between clock edges.
+This organization follows the classic single-cycle datapath model described by
+Patterson and Hennessy [5].
 
 ![Single-cycle instruction flow](docs/diagrams/instruction-cycle.svg)
 
@@ -380,6 +383,9 @@ The CPU reads `$zero`, forms the immediate value 5, and writes the result to
 
 More complete encoding tables are in
 [`docs/instruction-set.md`](docs/instruction-set.md).
+The instruction formats, register conventions, and operation semantics are
+based on the MIPS32 architecture references [1][2]; this repository implements
+an intentionally smaller educational subset.
 
 ---
 
@@ -595,6 +601,8 @@ Use these implementation conventions:
 Install Git and at least one Verilog simulator. Icarus Verilog is the
 simplest option for beginners; Verilator is a faster compiled simulator and
 also provides useful lint checks.
+The RTL uses Verilog/SystemVerilog language constructs standardized by IEEE
+1364 and IEEE 1800 [3][4].
 
 Ubuntu/Debian:
 
@@ -759,6 +767,25 @@ are the next chapters after the single-cycle design becomes familiar.
 - [Verification and CI](docs/verification.md)
 - [Learning notes and experiments](docs/learning-notes.md)
 - [Visual diagrams and editable Mermaid sources](docs/diagrams/README.md)
+
+## References
+
+1. MIPS Technologies, Inc., *MIPS32 Architecture For Programmers Volume I:
+   Introduction to the MIPS32 Architecture*, Revision 2.60, MD00082.
+   [PDF mirror](https://minnie.tuhs.org/CompArch/Resources/MD00082-2B-MIPS32INT-AFP-02_60.pdf)
+2. MIPS Technologies, Inc., *MIPS32 Architecture For Programmers Volume II:
+   The MIPS32 Instruction Set*, Revision 2.00, MD00086.
+   [Internet Archive record](https://archive.org/details/MIPS_Technologies_MD00086)
+3. IEEE, *IEEE Standard for Verilog Hardware Description Language*,
+   IEEE Std 1364-2005.
+   [IEEE standard](https://standards.ieee.org/standard/1364-2005.html)
+4. IEEE, *IEEE Standard for SystemVerilog—Unified Hardware Design,
+   Specification, and Verification Language*, IEEE Std 1800-2017.
+   [IEEE standard](https://standards.ieee.org/standard/1800-2017.html)
+5. David A. Patterson and John L. Hennessy, *Computer Organization and Design
+   RISC-V Edition: The Hardware/Software Interface*, 2nd ed., Morgan Kaufmann,
+   2021.
+   [Publisher page](https://shop.elsevier.com/books/computer-organization-and-design-risc-v-edition/patterson/978-0-12-820331-6)
 
 ## License
 
