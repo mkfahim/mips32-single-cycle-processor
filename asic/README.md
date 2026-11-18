@@ -1,16 +1,16 @@
 # ASIC Implementation
 
 This directory documents the ASIC implementation of the MIPS32 single-cycle
-processor. The RTL in `rtl/` remains the reference functional design.
+processor. The RTL in `rtl/` is the reference functional design.
 
-## Planned flow
+## Implementation flow
 
 ```text
 RTL -> simulation -> synthesis -> timing/area/power analysis
     -> physical design -> DRC/LVS verification
 ```
 
-Initial target and tools:
+The implementation was completed with:
 
 ```text
 PDK: <PDK name and version>
@@ -20,15 +20,16 @@ Physical design: <tool and version>
 
 ## Results
 
+The reported results correspond to commit `<commit>` and run date
+`<YYYY-MM-DD>`.
+
 | Metric | Result |
 |---|---|
-| Commit | `<commit>` |
-| Date | `<YYYY-MM-DD>` |
 | Standard-cell area | `<value>` |
 | Maximum frequency | `<value>` |
 | Timing slack | `<value>` |
 | Power | `<value>` |
 | DRC/LVS | `<PASS or pending>` |
 
-No ASIC measurements are claimed until the flow has been run and the tools,
-PDK, constraints, and reports have been recorded.
+Tool versions, PDK configuration, constraints, and reports are recorded with
+the results.
