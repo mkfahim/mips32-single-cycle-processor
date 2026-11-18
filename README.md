@@ -764,6 +764,31 @@ are the next chapters after the single-cycle design becomes familiar.
 
 ---
 
+## Contributing and testing an instruction
+
+Adding a new instruction should follow the same hardware-and-verification
+pattern used throughout the repository:
+
+1. Add the instruction encoding and expected behavior to
+   `docs/instruction-set.md`.
+2. Extend `rtl/control_unit.v` with the required opcode/function decoding and
+   control signals. Keep default behavior safe for unsupported instructions.
+3. Implement or adjust the datapath in `rtl/datapath.v` if the instruction needs
+   new operand, write-back, memory, or PC behavior.
+4. Add focused RTL tests to `tb/control_unit_tb.v`, `tb/datapath_tb.v`, or the
+   relevant unit testbench, then add an integration program to
+   `tb/mips32_cpu_tb.v`.
+5. Run the relevant testbench first, followed by the complete CPU test with both
+   Icarus Verilog and, where available, Verilator.
+6. Update the supported-instruction table and documentation diagrams when the
+   design changes.
+
+New instructions should include positive behavior checks, `$zero` behavior,
+alignment or invalid-address cases where relevant, and an unchanged-CPU-state
+check for unsupported or malformed instructions.
+
+---
+
 ## Further reading
 
 - [Beginner roadmap](docs/beginner-roadmap.md)
