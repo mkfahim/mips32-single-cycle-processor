@@ -39,9 +39,10 @@ connect textbook concepts to the actual files in `rtl/`.
 12. [Repository structure](#repository-structure)
 13. [Run the processor](#run-the-processor)
 14. [Understand the testbenches](#understand-the-testbenches)
-15. [What this project does not cover](#what-this-project-does-not-cover)
-16. [Further reading](#further-reading)
-17. [References](#references)
+15. [ASIC implementation](#asic-implementation)
+16. [What this project does not cover](#what-this-project-does-not-cover)
+17. [Further reading](#further-reading)
+18. [References](#references)
 
 ---
 
@@ -621,6 +622,18 @@ Use these implementation conventions:
 
 </details>
 
+<details>
+<summary><strong>asic/ — ASIC implementation roadmap</strong></summary>
+
+| File or directory | Purpose |
+|---|---|
+| `README.md` | ASIC flow, evaluation plan, and current status |
+| `constraints/` | Future clock and timing constraints |
+| `scripts/` | Future synthesis and physical-design scripts |
+| `results/` | Future area, timing, power, and verification results |
+
+</details>
+
 ---
 
 ## Run the processor
@@ -783,6 +796,19 @@ when a module feels unfamiliar: the checks explain what behavior the module
 promises.
 
 More detail is available in [`docs/verification.md`](docs/verification.md).
+
+---
+
+## ASIC implementation
+
+ASIC implementation is developed on the
+[`asic-implementation` branch](https://github.com/mkfahim/mips32-single-cycle-processor/tree/asic-implementation).
+The dedicated [`asic/README.md`](asic/README.md) documents the planned
+synthesis and physical-design flow, evaluation metrics, and implementation
+status.
+
+The processor RTL remains the reference design. ASIC results will be added
+only after the flow is run and the measurements are recorded.
 
 ---
 
