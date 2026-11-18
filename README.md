@@ -645,18 +645,7 @@ sudo apt-get install -y iverilog verilator
 From the repository root:
 
 ```sh
-iverilog -g2012 -o cpu_sim \
-  tb/mips32_cpu_tb.v \
-  rtl/mips32_cpu.v \
-  rtl/pc.v \
-  rtl/instruction_memory.v \
-  rtl/data_memory.v \
-  rtl/datapath.v \
-  rtl/control_unit.v \
-  rtl/register_file.v \
-  rtl/alu.v
-
-vvp cpu_sim
+iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/*.v && vvp cpu_sim
 ```
 
 The testbench loads a small program into instruction memory and verifies
@@ -672,19 +661,9 @@ as `always #5 clk = ~clk` and `@(posedge clk)`.
 From the repository root:
 
 ```sh
-verilator --binary --timing \
-  --top-module mips32_cpu_tb \
-  tb/mips32_cpu_tb.v \
-  rtl/mips32_cpu.v \
-  rtl/pc.v \
-  rtl/instruction_memory.v \
-  rtl/data_memory.v \
-  rtl/datapath.v \
-  rtl/control_unit.v \
-  rtl/register_file.v \
-  rtl/alu.v
-
-./obj_dir/Vmips32_cpu_tb
+verilator --binary --timing --top-module mips32_cpu_tb \
+  tb/mips32_cpu_tb.v rtl/*.v \
+  && ./obj_dir/Vmips32_cpu_tb
 ```
 
 The Verilator executable should print the same `PASS` checks as the Icarus
@@ -711,19 +690,9 @@ $dumpvars(0, mips32_cpu_tb);
 Then compile with Verilator tracing enabled:
 
 ```sh
-verilator --binary --timing --trace \
-  --top-module mips32_cpu_tb \
-  tb/mips32_cpu_tb.v \
-  rtl/mips32_cpu.v \
-  rtl/pc.v \
-  rtl/instruction_memory.v \
-  rtl/data_memory.v \
-  rtl/datapath.v \
-  rtl/control_unit.v \
-  rtl/register_file.v \
-  rtl/alu.v
-
-./obj_dir/Vmips32_cpu_tb
+verilator --binary --timing --trace --top-module mips32_cpu_tb \
+  tb/mips32_cpu_tb.v rtl/*.v \
+  && ./obj_dir/Vmips32_cpu_tb
 gtkwave cpu.vcd
 ```
 
@@ -789,7 +758,7 @@ iverilog -g2012 -o pc_sim tb/pc_tb.v rtl/pc.v && vvp pc_sim
 iverilog -g2012 -o instruction_memory_sim tb/instruction_memory_tb.v rtl/instruction_memory.v && vvp instruction_memory_sim
 iverilog -g2012 -o data_memory_sim tb/data_memory_tb.v rtl/data_memory.v && vvp data_memory_sim
 iverilog -g2012 -o datapath_sim tb/datapath_tb.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v && vvp datapath_sim
-iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/mips32_cpu.v rtl/pc.v rtl/instruction_memory.v rtl/data_memory.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v && vvp cpu_sim
+iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/*.v && vvp cpu_sim
 ```
 
 </details>
