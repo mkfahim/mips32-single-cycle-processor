@@ -752,7 +752,7 @@ iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/mips32_cpu.v rtl/pc.v rtl/inst
 
 ### Local outcome
 
-On commit `<COMMIT_SHA>`, all eight testbenches completed successfully:
+On commit `9189f61`, all eight testbenches completed successfully:
 
 | Testbench | Result |
 | --- | --- |
@@ -778,8 +778,8 @@ PASS: CPU integration test completed with no failures
 8/8 testbenches passed.
 ```
 
-The same eight testbenches also passed in GitHub Actions:
-[successful CI run](<CI_RUN_URL>)
+The same eight testbenches passed in GitHub Actions on commit `00f4488`:
+[successful CI run](https://github.com/mkfahim/mips32-single-cycle-processor/actions/runs/44253148815)
 
 The workflow uploads the individual simulator logs as build artifacts, allowing
 the results above to be checked against the complete test output.
