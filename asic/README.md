@@ -3,6 +3,23 @@
 This directory documents the ASIC implementation of the MIPS32 single-cycle
 processor. The RTL in `rtl/` is the reference functional design.
 
+## Directory structure
+
+```text
+asic/
+├── constraints/   # Clock and timing constraints
+├── scripts/       # Synthesis and physical-design scripts
+├── results/       # Area, timing, power, and DRC/LVS reports
+└── README.md      # ASIC flow and implementation results
+```
+
+| Component | Purpose |
+|---|---|
+| `constraints/` | Defines clocks, input/output delays, and timing requirements |
+| `scripts/` | Runs synthesis, analysis, and physical-design stages |
+| `results/` | Stores measured reports and implementation summaries |
+| `README.md` | Records the flow, tools, configuration, and results |
+
 ## Implementation flow
 
 ```text
