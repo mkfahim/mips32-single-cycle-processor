@@ -723,19 +723,37 @@ testbenches on pushes, pull requests, and manual workflow dispatches.
 
 ## Verification results
 
-The verification results below are evidence from an actual local run. The
-commands, simulator versions, testbench scope, and commit identifier are
-recorded so the result can be reproduced.
-
-### Tool versions
+The processor was verified with eight unit and integration testbenches.
 
 ```text
-Icarus Verilog: 12.0 (stable)
-Verilator: 5.020
-Operating system: Ubuntu 24.04.5 LTS (Noble Numbat)
+Icarus Verilog 12.0 | Verilator 5.020 | Ubuntu 24.04.5 LTS
 ```
 
-### Exact command sequence
+On commit `9189f61`, all eight testbenches passed:
+
+| Testbench | Result |
+| --- | --- |
+| `alu_tb.v` | PASS |
+| `register_file_tb.v` | PASS |
+| `control_unit_tb.v` | PASS |
+| `pc_tb.v` | PASS |
+| `instruction_memory_tb.v` | PASS |
+| `data_memory_tb.v` | PASS |
+| `datapath_tb.v` | PASS |
+| `mips32_cpu_tb.v` | PASS |
+
+Representative output:
+
+```text
+PASS: CPU integration test completed with no failures
+8/8 testbenches passed.
+```
+
+The same tests passed in [GitHub Actions](https://github.com/mkfahim/mips32-single-cycle-processor/actions/runs/44253148815);
+the workflow also uploads the complete simulator logs.
+
+<details>
+<summary>Exact local command sequence</summary>
 
 From the repository root:
 
@@ -750,39 +768,7 @@ iverilog -g2012 -o datapath_sim tb/datapath_tb.v rtl/datapath.v rtl/control_unit
 iverilog -g2012 -o cpu_sim tb/mips32_cpu_tb.v rtl/mips32_cpu.v rtl/pc.v rtl/instruction_memory.v rtl/data_memory.v rtl/datapath.v rtl/control_unit.v rtl/register_file.v rtl/alu.v && vvp cpu_sim
 ```
 
-### Local outcome
-
-On commit `9189f61`, all eight testbenches completed successfully:
-
-| Testbench | Result |
-| --- | --- |
-| `alu_tb.v` | PASS |
-| `register_file_tb.v` | PASS |
-| `control_unit_tb.v` | PASS |
-| `pc_tb.v` | PASS |
-| `instruction_memory_tb.v` | PASS |
-| `data_memory_tb.v` | PASS |
-| `datapath_tb.v` | PASS |
-| `mips32_cpu_tb.v` | PASS |
-
-Representative simulator output:
-
-```text
-PASS: Control unit test completed with no failures
-PASS: PC test completed with no failures
-PASS: Instruction memory test completed with no failures
-PASS: Data memory test completed with no failures
-PASS: Datapath test completed with no failures
-PASS: CPU integration test completed with no failures
-
-8/8 testbenches passed.
-```
-
-The same eight testbenches passed in GitHub Actions on commit `00f4488`:
-[successful CI run](https://github.com/mkfahim/mips32-single-cycle-processor/actions/runs/44253148815)
-
-The workflow uploads the individual simulator logs as build artifacts, allowing
-the results above to be checked against the complete test output.
+</details>
 
 ## Understand the testbenches
 
