@@ -1,68 +1,34 @@
 # ASIC Implementation
 
-This directory contains the ASIC-oriented implementation plan for the
-MIPS32 single-cycle processor. The RTL in `rtl/` remains the reference
-functional design; this work evaluates how that design can be synthesized and
-implemented as an ASIC.
-
-## Objectives
-
-- Keep the processor RTL synthesizable and technology-independent.
-- Define reproducible synthesis and physical-design flows.
-- Measure area, timing, and power after synthesis.
-- Run physical-design checks such as design-rule checking (DRC) and
-  layout-versus-schematic (LVS) when the flow is available.
-- Document tool versions, PDK configuration, constraints, and results.
+This directory documents the ASIC implementation of the MIPS32 single-cycle
+processor. The RTL in `rtl/` remains the reference functional design.
 
 ## Planned flow
 
 ```text
-RTL
-  -> lint and simulation
-  -> logic synthesis
-  -> timing, area, and power analysis
-  -> floorplanning
-  -> placement and clock-tree synthesis
-  -> routing
-  -> DRC/LVS verification
+RTL -> simulation -> synthesis -> timing/area/power analysis
+    -> physical design -> DRC/LVS verification
 ```
 
-The initial open-source flow will target a suitable open PDK, such as SKY130,
-using tools such as Yosys and OpenROAD. Commercial tools may be evaluated
-separately when their licenses and project constraints permit.
-
-## Planned layout
+Initial target and tools:
 
 ```text
-asic/
-├── constraints/   # Clock and timing constraints
-├── scripts/       # Synthesis and physical-design scripts
-├── results/       # Versioned reports and measurements
-└── README.md      # This document
+PDK: <PDK name and version>
+Synthesis: <tool and version>
+Physical design: <tool and version>
 ```
 
-Generated databases, large build directories, and proprietary tool outputs
-should not be committed unless they are needed to reproduce or review a
-specific result.
+## Results
 
-## Evaluation metrics
-
-| Metric | Status |
+| Metric | Result |
 |---|---|
-| RTL synthesis | Planned |
-| Standard-cell area | Planned |
-| Maximum frequency | Planned |
-| Timing slack | Planned |
-| Power estimate | Planned |
-| DRC verification | Planned |
-| LVS verification | Planned |
+| Commit | `<commit>` |
+| Date | `<YYYY-MM-DD>` |
+| Standard-cell area | `<value>` |
+| Maximum frequency | `<value>` |
+| Timing slack | `<value>` |
+| Power | `<value>` |
+| DRC/LVS | `<PASS or pending>` |
 
-No ASIC measurements are claimed until the corresponding flow has been run
-and the tool versions, PDK, constraints, and reports have been recorded.
-
-## Relationship to verification
-
-RTL simulation verifies functional behavior. ASIC implementation evaluates
-whether that verified RTL can be mapped to physical hardware under a
-technology library and timing constraints. Both results are required for a
-complete implementation record.
+No ASIC measurements are claimed until the flow has been run and the tools,
+PDK, constraints, and reports have been recorded.
